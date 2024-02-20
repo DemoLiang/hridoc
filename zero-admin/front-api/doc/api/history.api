@@ -1,0 +1,70 @@
+info(
+	desc: "浏览记录"
+	author: "koobe"
+	email: "1002219331@qq.com"
+)
+
+type addReadHistoryReq {
+	ProductId       int64   `json:"productId"`       // 商品id
+	ProductName     string  `json:"productName"`     // 商品名称
+	ProductPic      string  `json:"productPic"`      // 商品图片
+	ProductSubTitle string  `json:"productSubTitle"` // 商品标题
+	ProductPrice    float64 `json:"productPrice"`    // 商品价格
+}
+type addReadHistoryResp {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+}
+
+type ReadHistoryDeleteReq {
+	Id int64 `path:"id"`
+}
+
+type ReadHistoryDeleteResp {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+}
+
+type ReadHistoryListResp {
+	Code    int64               `json:"code"`
+	Message string              `json:"message"`
+	Data  []ReadHistoryList `json:"data"`  //浏览列表
+}
+
+
+type ReadHistoryList {
+	Id              int64   `json:"id"`              // 编号
+	MemberId        int64   `json:"memberId"`        // 会员id
+	MemberNickName  string  `json:"memberNickName"`  // 会员姓名
+	MemberIcon      string  `json:"memberIcon"`      // 会员头像
+	ProductId       int64   `json:"productId"`       // 商品id
+	ProductName     string  `json:"productName"`     // 商品名称
+	ProductPic      string  `json:"productPic"`      // 商品图片
+	ProductSubTitle string  `json:"productSubTitle"` // 商品标题
+	ProductPrice    float64 `json:"productPrice"`    // 商品价格
+	CreateTime      string  `json:"createTime"`      // 浏览时间
+}
+
+type ReadHistoryClearResp {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+}
+
+@server(
+	jwt: Auth
+	group: history
+	prefix: /api/history
+)
+service front-api {
+	@handler AddReadHistoryAdd
+	post /add (addReadHistoryReq) returns (addReadHistoryResp)
+	
+	@handler ReadHistoryDelete
+	get /delete/:id (ReadHistoryDeleteReq) returns (ReadHistoryDeleteResp)
+	
+	@handler ReadHistoryList
+	get /list returns (ReadHistoryListResp)
+	
+	@handler ReadHistoryClear
+	get /clear returns (ReadHistoryClearResp)
+}

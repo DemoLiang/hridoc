@@ -1,0 +1,82 @@
+info(
+	desc: "会员地址"
+	author: "koobe"
+	email: "1002219331@qq.com"
+)
+
+type (
+	addMemberAddressReq {
+		Name          string `json:"name"` // 收货人名称
+		PhoneNumber   string `json:"phoneNumber"`
+		DefaultStatus int64  `json:"defaultStatus"` // 是否为默认
+		PostCode      string `json:"postCode"`      // 邮政编码
+		Province      string `json:"province"`      // 省份/直辖市
+		City          string `json:"city"`          // 城市
+		Region        string `json:"region"`        // 区
+		DetailAddress string `json:"detailAddress"` // 详细地址(街道)
+	}
+	addMemberAddressResp {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+
+	ListMemberAddressData {
+		Id            int64  `json:"id"`
+		MemberId      int64  `json:"memberId"`
+		Name          string `json:"name"` // 收货人名称
+		PhoneNumber   string `json:"phoneNumber"`
+		DefaultStatus int64  `json:"defaultStatus"` // 是否为默认
+		PostCode      string `json:"postCode"`      // 邮政编码
+		Province      string `json:"province"`      // 省份/直辖市
+		City          string `json:"city"`          // 城市
+		Region        string `json:"region"`        // 区
+		DetailAddress string `json:"detailAddress"` // 详细地址(街道)
+	}
+	ListMemberAddressResp {
+		Data     []ListMemberAddressData `json:"data"`
+		Success  bool                    `json:"success"`
+		Code     int64                   `json:"code"`
+		Message  string                  `json:"message"`
+	}
+	UpdateMemberAddressReq {
+		Id            int64  `json:"id"`
+		Name          string `json:"name"` // 收货人名称
+		PhoneNumber   string `json:"phoneNumber"`
+		DefaultStatus int64  `json:"defaultStatus"` // 是否为默认
+		PostCode      string `json:"postCode"`      // 邮政编码
+		Province      string `json:"province"`      // 省份/直辖市
+		City          string `json:"city"`          // 城市
+		Region        string `json:"region"`        // 区
+		DetailAddress string `json:"detailAddress"` // 详细地址(街道)
+	}
+	UpdateMemberAddressResp {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+	DeleteMemberAddressReq {
+		Id int64 `path:"id"`
+	}
+	DeleteMemberAddressResp {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+)
+
+@server(
+	jwt: Auth
+	group: member/address
+	prefix: /api/member/address
+)
+service front-api {
+	@handler MemberAddressAdd
+	post /add (addMemberAddressReq) returns (addMemberAddressResp)
+	
+	@handler MemberAddressList
+	get /list returns (ListMemberAddressResp)
+	
+	@handler MemberAddressUpdate
+	post /update (UpdateMemberAddressReq) returns (UpdateMemberAddressResp)
+	
+	@handler MemberAddressDelete
+	get /delete/:id (DeleteMemberAddressReq) returns (DeleteMemberAddressResp)
+}
