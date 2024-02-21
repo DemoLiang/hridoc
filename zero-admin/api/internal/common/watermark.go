@@ -53,7 +53,7 @@
 // 	MakeWaterMarker("./22.jpg", "测试水印", "./abc.jpg")
 // }
 
-package main
+package common
 
 import (
 	"fmt"
