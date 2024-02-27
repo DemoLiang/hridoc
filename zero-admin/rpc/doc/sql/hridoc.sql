@@ -1,3 +1,4 @@
+# 证书
 CREATE TABLE `certificate` (
     `created_at` datetime(3) DEFAULT NULL,
     `updated_at` datetime(3) DEFAULT NULL,
@@ -10,7 +11,8 @@ CREATE TABLE `certificate` (
     KEY `idx_name` (`name`),
     KEY `idx_user_id` (`user_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-CREATE TABLE `certificate_type` (
+#类型
+CREATE TABLE `certificate_category` (
     `created_at` datetime(3) DEFAULT NULL,
     `updated_at` datetime(3) DEFAULT NULL,
     `deleted_at` datetime(3) DEFAULT NULL,
