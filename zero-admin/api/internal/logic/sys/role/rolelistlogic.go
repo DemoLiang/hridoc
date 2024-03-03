@@ -44,6 +44,7 @@ func (l *RoleListLogic) RoleList(req types.ListRoleReq) (*types.ListRoleResp, er
 		logc.Errorf(l.ctx, "参数: %+v,查询角色列表异常:%s", req, err.Error())
 		return nil, errorx.NewDefaultError("查询角色失败")
 	}
+	logc.Infof(l.ctx, "---------------:%+v", resp)
 
 	var list []*types.ListRoleData
 
@@ -62,6 +63,7 @@ func (l *RoleListLogic) RoleList(req types.ListRoleReq) (*types.ListRoleResp, er
 			Status:         role.Status,
 		})
 	}
+	logc.Infof(l.ctx, "list:%+v", list)
 
 	return &types.ListRoleResp{
 		Code:     "000000",

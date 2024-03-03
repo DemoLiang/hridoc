@@ -17,7 +17,7 @@ export function login(data) {
  */
 export function getInfo() {
   return request({
-    url: '/api/sys/user/currentUser',
+    url: '/api/sys/user/info',
     method: 'get'
   })
 }

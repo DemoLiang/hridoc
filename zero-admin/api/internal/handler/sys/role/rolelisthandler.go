@@ -21,6 +21,7 @@ func RoleListHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		l := role.NewRoleListLogic(r.Context(), ctx)
 		resp, err := l.RoleList(req)
 		if err != nil {
+			l.Logger.Infof("-------------查询角色列表异常:%s", err.Error())
 			httpx.Error(w, err)
 		} else {
 			httpx.OkJson(w, resp)
