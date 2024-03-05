@@ -188,7 +188,7 @@
           importance: undefined,
           title: undefined,
           type: undefined,
-          status: ''
+          status:2
         },
         importanceOptions: [1, 2, 3],
         sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],

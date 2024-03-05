@@ -208,6 +208,7 @@ type ListRoleReq struct {
 	PageSize int64  `json:"pageSize,default=20"`
 	Name     string `json:"name,optional "`
 	Status   int64  `json:"status,default=2"`
+	CreateBy string `json:"createBy,optional"` // 创建人
 }
 
 type ListRoleData struct {

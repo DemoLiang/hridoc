@@ -33,6 +33,7 @@ func NewRoleListLogic(ctx context.Context, svcCtx *svc.ServiceContext) RoleListL
 
 // RoleList 角色列表
 func (l *RoleListLogic) RoleList(req types.ListRoleReq) (*types.ListRoleResp, error) {
+	l.Logger.Infof("==========================req:%+v", req)
 	resp, err := l.svcCtx.RoleService.RoleList(l.ctx, &sysclient.RoleListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,

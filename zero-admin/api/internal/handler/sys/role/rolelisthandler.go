@@ -1,6 +1,7 @@
 package role
 
 import (
+	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"zero-admin/api/internal/logic/sys/role"
 
@@ -12,6 +13,7 @@ import (
 
 func RoleListHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		logx.Infof("-------------查询角色列表异常:")
 		var req types.ListRoleReq
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.Error(w, err)
