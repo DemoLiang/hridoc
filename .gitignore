@@ -7,8 +7,6 @@
 *.dll
 *.so
 *.dylib
-api
-sys
 
 # Test binary, built with `go test -c`
 *.test

@@ -1,0 +1,87 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+
+// AddCertificateReq 证书添加请求
+type AddCertificateReq {
+    Name string //证书名称
+    Path string  //存储位置
+    UserId string // 证书持有人
+}
+
+type AddCertificateResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+type ListCertificateReq{
+    current int64
+    pageSize int64
+}
+
+type CertificateListData {
+    Id string
+    Name string//证书名称
+    Path string //存储位置
+    UserId string// 证书持有人
+}
+
+type ListCertificateResp{
+    Code    string          `json:"code"`
+    Message string          `json:"message"`
+    Data    []*CertificateListData `json:"data"`
+    Success bool            `json:"success"`
+    Total   int64           `json:"total"`
+}
+
+type UpdateCertificateReq{
+    Id string //证书ID
+    Name string //证书名称
+    Path string //存储位置
+    UserId string// 证书持有人
+}
+
+type UpdateCertificateResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+type DeleteCertificateReq{
+    Id string //证书ID
+}
+
+type DeleteCertificateResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+
+
+
+
+@server(
+    jwt: Auth
+    middleware: CheckUrl
+    group: sys/hridoc
+    prefix: /api/sys/hridoc/certificate
+)
+service admin-api {
+    @handler Add
+    post /add (AddCertificateReq) returns (AddCertificateResp)
+
+    @handler CertificateList
+    post /list (ListCertificateReq) returns (ListCertificateResp)
+
+    @handler CertificateUpdate
+    post /update (UpdateCertificateReq) returns (UpdateCertificateResp)
+
+    @handler CertificateDelete
+    post /delete (DeleteCertificateReq) returns (DeleteCertificateResp)
+}

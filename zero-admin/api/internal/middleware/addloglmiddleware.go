@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"zero-admin/rpc/hridoc/client/syslogservice"
 	"zero-admin/rpc/proto/sys"
-	"zero-admin/rpc/sys/client/syslogservice"
 )
 
 type AddLogMiddleware struct {

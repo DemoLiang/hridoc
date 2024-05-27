@@ -1,0 +1,75 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "demoliang"
+    email: "10086ng@10086ng.com"
+    version: "type version here"
+)
+
+type AddCertificateCategoryReq {
+    Name string //证书分类名称
+}
+
+type AddCertificateCategoryResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+type ListCertificateCategoryReq{
+    current int64
+    pageSize int64
+}
+
+type CertificateCategoryListData {
+    Id string
+    Name string//证书分类名称
+}
+
+type ListCertificateCategoryResp{
+    Code    string          `json:"code"`
+    Message string          `json:"message"`
+    Data    []*CertificateCategoryListData `json:"data"`
+    Success bool            `json:"success"`
+    Total   int64           `json:"total"`
+}
+
+type UpdateCertificateCategoryReq{
+    Id string //证书分类ID
+    Name string //证书分类名称
+}
+
+type UpdateCertificateCategoryResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+type DeleteCertificateCategoryReq{
+    Id string //证书分类ID
+}
+
+type DeleteCertificateCategoryResp{
+    Code    string `json:"code"`
+    Message string `json:"message"`
+}
+
+@server(
+    jwt: Auth
+    middleware: CheckUrl
+    group: sys/hridoc
+    prefix: /api/sys/hridoc/category
+)
+service admin-api {
+    @handler Add
+    post /add (AddCertificateCategoryReq) returns (AddCertificateCategoryResp)
+
+    @handler CertificateCategoryList
+    post /list (ListCertificateCategoryReq) returns (ListCertificateCategoryResp)
+
+    @handler CertificateCategoryUpdate
+    post /update (UpdateCertificateCategoryReq) returns (UpdateCertificateCategoryResp)
+
+    @handler CertificateCategoryDelete
+    post /delete (DeleteCertificateCategoryReq) returns (DeleteCertificateCategoryResp)
+}
