@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewDictDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) DictDel
 
 // DictDelete 删除字典信息
 func (l *DictDeleteLogic) DictDelete(req types.DeleteDictReq) (*types.DeleteDictResp, error) {
-	_, err := l.svcCtx.DictService.DictDelete(l.ctx, &sysclient.DictDeleteReq{
+	_, err := l.svcCtx.DictService.DictDelete(l.ctx, &sys.DictDeleteReq{
 		Ids: req.Ids,
 	})
 

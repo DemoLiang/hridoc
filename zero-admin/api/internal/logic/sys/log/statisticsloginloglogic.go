@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewStatisticsLoginLogLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // StatisticsLoginLog 统计后台用户登录---(查询当天登录人数（根据IP,统计当前周登录人数（根据IP）,统计当前月登录人数（根据IP）)
 func (l *StatisticsLoginLogLogic) StatisticsLoginLog(req *types.StatisticsLoginLogReq) (*types.StatisticsLoginLogResp, error) {
-	resp, err := l.svcCtx.LoginLogService.StatisticsLoginLog(l.ctx, &sysclient.StatisticsLoginLogReq{
+	resp, err := l.svcCtx.LoginLogService.StatisticsLoginLog(l.ctx, &sys.StatisticsLoginLogReq{
 		Status: "1",
 	})
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewRoleUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) RoleUpd
 
 // RoleUpdate 更新角色(id为1的是系统预留超级管理员角色,不能更新)
 func (l *RoleUpdateLogic) RoleUpdate(req types.UpdateRoleReq) (*types.UpdateRoleResp, error) {
-	roleUpdateReq := sysclient.RoleUpdateReq{
+	roleUpdateReq := sys.RoleUpdateReq{
 		Id:           req.Id,
 		Name:         req.Name,
 		Remark:       req.Remark,

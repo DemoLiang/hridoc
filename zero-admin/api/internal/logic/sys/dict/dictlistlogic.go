@@ -6,7 +6,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,7 +32,7 @@ func NewDictListLogic(ctx context.Context, svcCtx *svc.ServiceContext) DictListL
 
 // DictList 字典列表
 func (l *DictListLogic) DictList(req types.ListDictReq) (*types.ListDictResp, error) {
-	resp, err := l.svcCtx.DictService.DictList(l.ctx, &sysclient.DictListReq{
+	resp, err := l.svcCtx.DictService.DictList(l.ctx, &sys.DictListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 		Value:    req.Value,

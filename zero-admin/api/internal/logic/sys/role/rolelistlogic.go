@@ -7,7 +7,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,7 +34,7 @@ func NewRoleListLogic(ctx context.Context, svcCtx *svc.ServiceContext) RoleListL
 // RoleList 角色列表
 func (l *RoleListLogic) RoleList(req types.ListRoleReq) (*types.ListRoleResp, error) {
 	l.Logger.Infof("==========================req:%+v", req)
-	resp, err := l.svcCtx.RoleService.RoleList(l.ctx, &sysclient.RoleListReq{
+	resp, err := l.svcCtx.RoleService.RoleList(l.ctx, &sys.RoleListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 		Name:     req.Name,

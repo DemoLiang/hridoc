@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewLoginLogDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) Log
 
 // LoginLogDelete 删除登录日志
 func (l *LoginLogDeleteLogic) LoginLogDelete(req types.DeleteLoginLogReq) (*types.DeleteLoginLogResp, error) {
-	_, err := l.svcCtx.LoginLogService.LoginLogDelete(l.ctx, &sysclient.LoginLogDeleteReq{
+	_, err := l.svcCtx.LoginLogService.LoginLogDelete(l.ctx, &sys.LoginLogDeleteReq{
 		Ids: req.Ids,
 	})
 

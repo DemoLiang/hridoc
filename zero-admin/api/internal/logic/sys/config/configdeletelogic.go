@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewConfigDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) Confi
 
 // ConfigDelete 删除配置
 func (l *ConfigDeleteLogic) ConfigDelete(req types.DeleteConfigReq) (*types.DeleteConfigResp, error) {
-	_, err := l.svcCtx.ConfigService.ConfigDelete(l.ctx, &sysclient.ConfigDeleteReq{
+	_, err := l.svcCtx.ConfigService.ConfigDelete(l.ctx, &sys.ConfigDeleteReq{
 		Ids: req.Ids,
 	})
 

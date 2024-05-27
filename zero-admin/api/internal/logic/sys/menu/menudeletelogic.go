@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewMenuDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) MenuDel
 
 // MenuDelete 删除菜单
 func (l *MenuDeleteLogic) MenuDelete(req types.DeleteMenuReq) (*types.DeleteMenuResp, error) {
-	if _, err := l.svcCtx.MenuService.MenuDelete(l.ctx, &sysclient.MenuDeleteReq{
+	if _, err := l.svcCtx.MenuService.MenuDelete(l.ctx, &sys.MenuDeleteReq{
 		Ids: req.Ids,
 	}); err != nil {
 		logc.Errorf(l.ctx, "根据menuId: %+v,删除菜单异常:%s", req.Ids, err.Error())

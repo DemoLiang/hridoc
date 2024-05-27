@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewUpdateUserStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) U
 // UpdateUserStatus 更新用户状态
 func (l *UpdateUserStatusLogic) UpdateUserStatus(req types.UserStatusReq) (*types.UserStatusResp, error) {
 
-	_, err := l.svcCtx.UserService.UpdateUserStatus(l.ctx, &sysclient.UserStatusReq{
+	_, err := l.svcCtx.UserService.UpdateUserStatus(l.ctx, &sys.UserStatusReq{
 		Id:           req.Id,
 		Status:       req.Status,
 		LastUpdateBy: l.ctx.Value("userName").(string),

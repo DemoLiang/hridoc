@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewDeptDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) DeptDel
 
 // DeptDelete 删除部门信息
 func (l *DeptDeleteLogic) DeptDelete(req types.DeleteDeptReq) (*types.DeleteDeptResp, error) {
-	_, err := l.svcCtx.DeptService.DeptDelete(l.ctx, &sysclient.DeptDeleteReq{
+	_, err := l.svcCtx.DeptService.DeptDelete(l.ctx, &sys.DeptDeleteReq{
 		Ids: req.Ids,
 	})
 

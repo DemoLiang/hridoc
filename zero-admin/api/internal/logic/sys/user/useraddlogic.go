@@ -6,7 +6,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,7 +32,7 @@ func NewUserAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) UserAddLog
 
 // UserAdd 新增用户
 func (l *UserAddLogic) UserAdd(req types.AddUserReq) (*types.AddUserResp, error) {
-	userAddReq := sysclient.UserAddReq{
+	userAddReq := sys.UserAddReq{
 		Email:    req.Email,
 		Mobile:   req.Mobile,
 		Name:     req.Name,

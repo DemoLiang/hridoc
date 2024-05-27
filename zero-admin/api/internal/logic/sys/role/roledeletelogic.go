@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -34,7 +34,7 @@ func NewRoleDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) RoleDel
 // RoleDelete 删除角色(id为1的是系统预留超级管理员角色,不能删除)
 func (l *RoleDeleteLogic) RoleDelete(req types.DeleteRoleReq) (*types.DeleteRoleResp, error) {
 
-	_, err := l.svcCtx.RoleService.RoleDelete(l.ctx, &sysclient.RoleDeleteReq{
+	_, err := l.svcCtx.RoleService.RoleDelete(l.ctx, &sys.RoleDeleteReq{
 		Ids: req.Ids,
 	})
 

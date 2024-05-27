@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewJobDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) JobDelet
 
 // JobDelete 删除岗位信息
 func (l *JobDeleteLogic) JobDelete(req types.DeleteJobReq) (*types.DeleteJobResp, error) {
-	_, err := l.svcCtx.JobService.JobDelete(l.ctx, &sysclient.JobDeleteReq{
+	_, err := l.svcCtx.JobService.JobDelete(l.ctx, &sys.JobDeleteReq{
 		Ids: req.Ids,
 	})
 

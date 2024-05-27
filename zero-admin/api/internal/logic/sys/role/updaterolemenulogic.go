@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewUpdateRoleMenuLogic(ctx context.Context, svcCtx *svc.ServiceContext) Upd
 
 // UpdateRoleMenu 更新角色与菜单的关联
 func (l *UpdateRoleMenuLogic) UpdateRoleMenu(req types.UpdateRoleMenuReq) (*types.UpdateRoleMenuResp, error) {
-	_, err := l.svcCtx.RoleService.UpdateMenuRole(l.ctx, &sysclient.UpdateMenuRoleReq{
+	_, err := l.svcCtx.RoleService.UpdateMenuRole(l.ctx, &sys.UpdateMenuRoleReq{
 		RoleId:   req.RoleId,
 		MenuIds:  req.MenuIds,
 		CreateBy: l.ctx.Value("userName").(string),

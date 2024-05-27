@@ -7,7 +7,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,7 +33,7 @@ func NewMenuListLogic(ctx context.Context, svcCtx *svc.ServiceContext) MenuListL
 
 // MenuList 菜单列表
 func (l *MenuListLogic) MenuList(req types.ListMenuReq) (*types.ListMenuResp, error) {
-	resp, err := l.svcCtx.MenuService.MenuList(l.ctx, &sysclient.MenuListReq{
+	resp, err := l.svcCtx.MenuService.MenuList(l.ctx, &sys.MenuListReq{
 		Name: req.Name,
 		Url:  req.Url,
 	})

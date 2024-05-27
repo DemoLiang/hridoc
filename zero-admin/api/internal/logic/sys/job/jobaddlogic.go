@@ -6,7 +6,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,7 +32,7 @@ func NewJobAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) JobAddLogic
 
 // JobAdd 添加岗位信息
 func (l *JobAddLogic) JobAdd(req types.AddJobReq) (*types.AddJobResp, error) {
-	_, err := l.svcCtx.JobService.JobAdd(l.ctx, &sysclient.JobAddReq{
+	_, err := l.svcCtx.JobService.JobAdd(l.ctx, &sys.JobAddReq{
 		JobName:  req.JobName,
 		OrderNum: req.OrderNum,
 		CreateBy: l.ctx.Value("userName").(string),

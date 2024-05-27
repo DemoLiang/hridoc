@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewDictAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) DictAddLog
 
 // DictAdd 添加字典信息
 func (l *DictAddLogic) DictAdd(req types.AddDictReq) (*types.AddDictResp, error) {
-	_, err := l.svcCtx.DictService.DictAdd(l.ctx, &sysclient.DictAddReq{
+	_, err := l.svcCtx.DictService.DictAdd(l.ctx, &sys.DictAddReq{
 		Value:       req.Value,
 		Label:       req.Label,
 		Type:        req.Type,

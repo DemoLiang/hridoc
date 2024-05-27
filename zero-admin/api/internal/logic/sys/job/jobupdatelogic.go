@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewJobUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) JobUpdat
 
 // JobUpdate 更新岗位信息
 func (l *JobUpdateLogic) JobUpdate(req types.UpdateJobReq) (*types.UpdateJobResp, error) {
-	_, err := l.svcCtx.JobService.JobUpdate(l.ctx, &sysclient.JobUpdateReq{
+	_, err := l.svcCtx.JobService.JobUpdate(l.ctx, &sys.JobUpdateReq{
 		Id:           req.Id,
 		JobName:      req.JobName,
 		OrderNum:     req.OrderNum,

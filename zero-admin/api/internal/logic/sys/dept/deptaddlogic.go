@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewDeptAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) DeptAddLog
 
 // DeptAdd 添加部门信息
 func (l *DeptAddLogic) DeptAdd(req types.AddDeptReq) (*types.AddDeptResp, error) {
-	_, err := l.svcCtx.DeptService.DeptAdd(l.ctx, &sysclient.DeptAddReq{
+	_, err := l.svcCtx.DeptService.DeptAdd(l.ctx, &sys.DeptAddReq{
 		Name:      req.Name,
 		ParentId:  req.ParentId,
 		OrderNum:  req.OrderNum,

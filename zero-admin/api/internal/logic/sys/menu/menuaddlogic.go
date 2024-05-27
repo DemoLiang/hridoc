@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewMenuAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) MenuAddLog
 
 // MenuAdd 新增菜单
 func (l *MenuAddLogic) MenuAdd(req types.AddMenuReq) (*types.AddMenuResp, error) {
-	menuAddReq := sysclient.MenuAddReq{
+	menuAddReq := sys.MenuAddReq{
 		Name:          req.Name,
 		ParentId:      req.ParentId,
 		Url:           req.Url,

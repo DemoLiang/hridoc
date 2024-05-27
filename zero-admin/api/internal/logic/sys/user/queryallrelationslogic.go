@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -34,7 +34,7 @@ func NewQueryAllRelationsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 // QueryAllRelations //查询用户的角色,单位,岗位的关系
 func (l *QueryAllRelationsLogic) QueryAllRelations(req *types.QueryAllRelationsReq) (resp *types.QueryAllRelationsResp, err error) {
 	//1.查询角色列表
-	roleListResp, err := l.svcCtx.RoleService.RoleList(l.ctx, &sysclient.RoleListReq{
+	roleListResp, err := l.svcCtx.RoleService.RoleList(l.ctx, &sys.RoleListReq{
 		Current:  1,
 		PageSize: 100,
 		Status:   1, //'状态  1:启用,0:禁用'
@@ -54,7 +54,7 @@ func (l *QueryAllRelationsLogic) QueryAllRelations(req *types.QueryAllRelationsR
 	}
 
 	//2.查询岗位列表信息
-	jobList, err := l.svcCtx.JobService.JobList(l.ctx, &sysclient.JobListReq{
+	jobList, err := l.svcCtx.JobService.JobList(l.ctx, &sys.JobListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 		DelFlag:  1,
@@ -73,7 +73,7 @@ func (l *QueryAllRelationsLogic) QueryAllRelations(req *types.QueryAllRelationsR
 	}
 
 	//3.查询部门信息
-	deptList, err := l.svcCtx.DeptService.DeptList(l.ctx, &sysclient.DeptListReq{})
+	deptList, err := l.svcCtx.DeptService.DeptList(l.ctx, &sys.DeptListReq{})
 
 	if err != nil {
 		return nil, errorx.NewDefaultError("查询部门异常")

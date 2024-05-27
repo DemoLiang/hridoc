@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewMenuUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) MenuUpd
 
 // MenuUpdate 更新菜单
 func (l *MenuUpdateLogic) MenuUpdate(req types.UpdateMenuReq) (*types.UpdateMenuResp, error) {
-	menuUpdateReq := sysclient.MenuUpdateReq{
+	menuUpdateReq := sys.MenuUpdateReq{
 		Id:            req.Id,
 		Name:          req.Name,
 		ParentId:      req.ParentId,

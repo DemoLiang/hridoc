@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewJobListLogic(ctx context.Context, svcCtx *svc.ServiceContext) JobListLog
 
 // JobList 岗位信息列表
 func (l *JobListLogic) JobList(req types.ListJobReq) (*types.ListJobResp, error) {
-	resp, err := l.svcCtx.JobService.JobList(l.ctx, &sysclient.JobListReq{
+	resp, err := l.svcCtx.JobService.JobList(l.ctx, &sys.JobListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 		JobName:  req.JobName,

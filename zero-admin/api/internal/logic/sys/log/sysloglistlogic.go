@@ -5,7 +5,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,7 +31,7 @@ func NewSysLogListLogic(ctx context.Context, svcCtx *svc.ServiceContext) SysLogL
 
 // SysLogList 操作日志列表
 func (l *SysLogListLogic) SysLogList(req types.ListSysLogReq) (*types.ListSysLogResp, error) {
-	resp, err := l.svcCtx.SysLogService.SysLogList(l.ctx, &sysclient.SysLogListReq{
+	resp, err := l.svcCtx.SysLogService.SysLogList(l.ctx, &sys.SysLogListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 		UserName: req.UserName,

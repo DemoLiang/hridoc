@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -32,7 +32,7 @@ func NewConfigUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) Confi
 
 // ConfigUpdate 更新配置
 func (l *ConfigUpdateLogic) ConfigUpdate(req types.UpdateConfigReq) (*types.UpdateConfigResp, error) {
-	_, err := l.svcCtx.ConfigService.ConfigUpdate(l.ctx, &sysclient.ConfigUpdateReq{
+	_, err := l.svcCtx.ConfigService.ConfigUpdate(l.ctx, &sys.ConfigUpdateReq{
 		Id:           req.Id,
 		Value:        req.Value,
 		Label:        req.Label,

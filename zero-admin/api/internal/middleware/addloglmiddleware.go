@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"zero-admin/rpc/proto/sys"
 	"zero-admin/rpc/sys/client/syslogservice"
-	"zero-admin/rpc/sys/sysclient"
 )
 
 type AddLogMiddleware struct {
@@ -64,7 +64,7 @@ func (m *AddLogMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		// 打印请求和响应耗时
 		duration := time.Since(startTime)
 		// 添加操作日志
-		_, _ = m.Sys.SysLogAdd(r.Context(), &sysclient.SysLogAddReq{
+		_, _ = m.Sys.SysLogAdd(r.Context(), &sys.SysLogAddReq{
 			UserName:       userName,
 			Operation:      r.Method,
 			Method:         uri,

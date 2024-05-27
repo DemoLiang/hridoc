@@ -6,7 +6,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,7 +32,7 @@ func NewUserUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) UserUpd
 
 // UserUpdate 更新用户信息
 func (l *UserUpdateLogic) UserUpdate(req types.UpdateUserReq) (*types.UpdateUserResp, error) {
-	userUpdateReq := sysclient.UserUpdateReq{
+	userUpdateReq := sys.UserUpdateReq{
 		Id:           req.Id,
 		Email:        req.Email,
 		Mobile:       req.Mobile,

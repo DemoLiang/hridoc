@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -39,7 +39,7 @@ func (l *UserInfoLogic) UserInfo() (*types.UserInfoResp, error) {
 	// 这里的key和生成jwt token时传入的key一致
 	userId, _ := l.ctx.Value("userId").(json.Number).Int64()
 
-	resp, err := l.svcCtx.UserService.UserInfo(l.ctx, &sysclient.InfoReq{
+	resp, err := l.svcCtx.UserService.UserInfo(l.ctx, &sys.InfoReq{
 		UserId: userId,
 	})
 

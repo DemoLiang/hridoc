@@ -5,7 +5,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,7 +31,7 @@ func NewConfigListLogic(ctx context.Context, svcCtx *svc.ServiceContext) ConfigL
 
 // ConfigList 配置列表
 func (l *ConfigListLogic) ConfigList(req types.ListConfigReq) (*types.ListConfigResp, error) {
-	resp, err := l.svcCtx.ConfigService.ConfigList(l.ctx, &sysclient.ConfigListReq{
+	resp, err := l.svcCtx.ConfigService.ConfigList(l.ctx, &sys.ConfigListReq{
 		Current:  req.Current,
 		PageSize: req.PageSize,
 	})

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logc"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewRoleAddLogic(ctx context.Context, svcCtx *svc.ServiceContext) RoleAddLog
 
 // RoleAdd 新增角色
 func (l *RoleAddLogic) RoleAdd(req types.AddRoleReq) (*types.AddRoleResp, error) {
-	roleAddReq := sysclient.RoleAddReq{
+	roleAddReq := sys.RoleAddReq{
 		Name:     req.Name,
 		Remark:   req.Remark,
 		CreateBy: l.ctx.Value("userName").(string),

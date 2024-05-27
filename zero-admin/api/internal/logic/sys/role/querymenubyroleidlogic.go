@@ -5,7 +5,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"strconv"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -36,7 +36,7 @@ func NewQueryMenuByRoleIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 func (l *QueryMenuByRoleIdLogic) QueryMenuByRoleId(req types.RoleMenuReq) (*types.RoleMenuResp, error) {
 
 	//查询所有菜单
-	resp, err := l.svcCtx.MenuService.MenuList(l.ctx, &sysclient.MenuListReq{
+	resp, err := l.svcCtx.MenuService.MenuList(l.ctx, &sys.MenuListReq{
 		Name: "",
 		Url:  "",
 	})
@@ -63,7 +63,7 @@ func (l *QueryMenuByRoleIdLogic) QueryMenuByRoleId(req types.RoleMenuReq) (*type
 
 	//如果角色不是admin则根据roleId查询菜单
 	if req.Id != 1 {
-		QueryMenu, err1 := l.svcCtx.RoleService.QueryMenuByRoleId(l.ctx, &sysclient.QueryMenuByRoleIdReq{
+		QueryMenu, err1 := l.svcCtx.RoleService.QueryMenuByRoleId(l.ctx, &sys.QueryMenuByRoleIdReq{
 			Id: req.Id,
 		})
 		if err1 != nil {

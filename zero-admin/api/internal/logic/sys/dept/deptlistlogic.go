@@ -7,7 +7,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 )
 
 // DeptListLogic 部门列表
@@ -31,7 +31,7 @@ func NewDeptListLogic(ctx context.Context, svcCtx *svc.ServiceContext) DeptListL
 
 // DeptList 部门列表
 func (l *DeptListLogic) DeptList(req types.ListDeptReq) (*types.ListDeptResp, error) {
-	resp, err := l.svcCtx.DeptService.DeptList(l.ctx, &sysclient.DeptListReq{
+	resp, err := l.svcCtx.DeptService.DeptList(l.ctx, &sys.DeptListReq{
 		Name:     req.Name,
 		CreateBy: req.CreateBy,
 	})

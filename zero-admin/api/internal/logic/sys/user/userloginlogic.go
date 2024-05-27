@@ -6,7 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"strings"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -42,7 +42,7 @@ func (l *UserLoginLogic) UserLogin(req types.LoginReq, ip string) (*types.LoginR
 		return nil, errorx.NewDefaultError("用户名或密码不能为空")
 	}
 
-	resp, err := l.svcCtx.UserService.Login(l.ctx, &sysclient.LoginReq{
+	resp, err := l.svcCtx.UserService.Login(l.ctx, &sys.LoginReq{
 		UserName: req.UserName,
 		Password: req.Password,
 	})
@@ -53,7 +53,7 @@ func (l *UserLoginLogic) UserLogin(req types.LoginReq, ip string) (*types.LoginR
 	}
 
 	//保存登录日志
-	_, _ = l.svcCtx.LoginLogService.LoginLogAdd(l.ctx, &sysclient.LoginLogAddReq{
+	_, _ = l.svcCtx.LoginLogService.LoginLogAdd(l.ctx, &sys.LoginLogAddReq{
 		UserName: resp.UserName,
 		Status:   "login",
 		Ip:       ip,

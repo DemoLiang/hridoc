@@ -7,7 +7,7 @@ import (
 	"zero-admin/api/internal/common/errorx"
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -34,7 +34,7 @@ func NewUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) UserListL
 // UserList 查询用户列表信息
 func (l *UserListLogic) UserList(req types.ListUserReq) (*types.ListUserResp, error) {
 
-	userListReq := sysclient.UserListReq{}
+	userListReq := sys.UserListReq{}
 	_ = copier.Copy(&userListReq, &req)
 	resp, err := l.svcCtx.UserService.UserList(l.ctx, &userListReq)
 

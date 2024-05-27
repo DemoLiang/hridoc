@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"zero-admin/api/internal/common/errorx"
-	"zero-admin/rpc/sys/sysclient"
+	"zero-admin/rpc/proto/sys"
 
 	"zero-admin/api/internal/svc"
 	"zero-admin/api/internal/types"
@@ -33,7 +33,7 @@ func NewReSetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) ReSe
 // ReSetPassword 重置用户密码
 func (l *ReSetPasswordLogic) ReSetPassword(req types.ReSetPasswordReq) (*types.ReSetPasswordResp, error) {
 
-	_, err := l.svcCtx.UserService.ReSetPassword(l.ctx, &sysclient.ReSetPasswordReq{
+	_, err := l.svcCtx.UserService.ReSetPassword(l.ctx, &sys.ReSetPasswordReq{
 		Id:           req.Id,
 		LastUpdateBy: l.ctx.Value("userName").(string),
 	})
