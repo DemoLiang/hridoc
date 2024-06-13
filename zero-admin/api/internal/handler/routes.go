@@ -337,7 +337,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/add",
-					Handler: syshridoc.AddHandler(serverCtx),
+					Handler: syshridoc.AddCertificateCategoryHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
@@ -372,7 +372,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/add",
-					Handler: syshridoc.AddHandler(serverCtx),
+					Handler: syshridoc.AddAddCertificateHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,

@@ -73,7 +73,7 @@ type DeleteCertificateResp{
     prefix: /api/sys/hridoc/certificate
 )
 service api {
-    @handler Add
+    @handler AddAddCertificate
     post /add (AddCertificateReq) returns (AddCertificateResp)
 
     @handler CertificateList

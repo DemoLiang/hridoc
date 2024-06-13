@@ -75,7 +75,7 @@ type DeleteCertificateCategoryResp{
     prefix: /api/sys/hridoc/category
 )
 service api {
-    @handler Add
+    @handler AddCertificateCategory
     // 增加证书类型
     post /add (AddCertificateCategoryReq) returns (AddCertificateCategoryResp)
 
