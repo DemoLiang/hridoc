@@ -735,3 +735,115 @@ type UploadResp struct {
 	Message string `json:"message"`
 	Data    string `json:"data"`
 }
+
+type AddCertificateCategoryReq struct {
+	Name string `json:"name"` //证书分类名称
+}
+
+type AddCertificateCategoryResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type ListCertificateCategoryReq struct {
+	Current  int64 `json:"current"`
+	PageSize int64 `json:"pageSize"`
+}
+
+type CertificateCategoryData struct {
+	Id   string `json:"id"`
+	Name string `json:"name"` //证书分类名称
+}
+
+type CertificateCategoryListData struct {
+	List []*CertificateCategoryData `json:"list"`
+}
+
+type ListCertificateCategoryResp struct {
+	Code    string                      `json:"code"`
+	Message string                      `json:"message"`
+	Data    CertificateCategoryListData `json:"data"`
+	Success bool                        `json:"success"`
+	Total   int64                       `json:"total"`
+}
+
+type GetCertificateCategoryReq struct {
+	Id string `json:"id"`
+}
+
+type GetCertificateCategoryResp struct {
+	Code    string                  `json:"code"`
+	Message string                  `json:"message"`
+	Data    CertificateCategoryData `json:"data"`
+}
+
+type UpdateCertificateCategoryReq struct {
+	Id   string `json:"id"`   //证书分类ID
+	Name string `json:"name"` //证书分类名称
+}
+
+type UpdateCertificateCategoryResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type DeleteCertificateCategoryReq struct {
+	Id string `json:"id"` //证书分类ID
+}
+
+type DeleteCertificateCategoryResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type AddCertificateReq struct {
+	Name   string `json:"name"`   //证书名称
+	Path   string `json:"path"`   //存储位置
+	UserId string `json:"userId"` // 证书持有人
+}
+
+type AddCertificateResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type ListCertificateReq struct {
+	Current  int64 `json:"current"`
+	PageSize int64 `json:"pageSize"`
+}
+
+type CertificateListData struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`   //证书名称
+	Path   string `json:"path"`   //存储位置
+	UserId string `json:"userId"` // 证书持有人
+}
+
+type ListCertificateResp struct {
+	Code    string                 `json:"code"`
+	Message string                 `json:"message"`
+	Data    []*CertificateListData `json:"data"`
+	Success bool                   `json:"success"`
+	Total   int64                  `json:"total"`
+}
+
+type UpdateCertificateReq struct {
+	Id     string `json:"id"`     //证书ID
+	Name   string `json:"name"`   //证书名称
+	Path   string `json:"path"`   //存储位置
+	UserId string `json:"userId"` // 证书持有人
+}
+
+type UpdateCertificateResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type DeleteCertificateReq struct {
+	Id string `json:"id"` //证书ID
+}
+
+type DeleteCertificateResp struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
