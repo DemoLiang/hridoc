@@ -192,7 +192,7 @@ type (
 	group: sys/user
 	prefix: /api/sys/user
 )
-service admin-api {
+service api {
 
 	//获取用户信息
 	@handler UserInfo
@@ -230,7 +230,7 @@ service admin-api {
 @server(
 	group: sys/user
 )
-service admin-api {
+service api {
 	@handler UserLogin
 	post /api/sys/user/login (loginReq) returns (loginResp)
 }

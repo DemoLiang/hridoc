@@ -68,7 +68,7 @@ type (
 	group: sys/job
 	prefix: /api/sys/job
 )
-service admin-api {
+service api {
 	@handler JobAdd
 	post /add (addJobReq) returns (addJobResp)
 	

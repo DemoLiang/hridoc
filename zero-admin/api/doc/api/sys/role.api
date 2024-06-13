@@ -95,7 +95,7 @@ type (
 	group: sys/role
 	prefix: /api/sys/role
 )
-service admin-api {
+service api {
 	//新增角色信息
 	@handler RoleAdd
 	post /add (addRoleReq) returns (addRoleResp)

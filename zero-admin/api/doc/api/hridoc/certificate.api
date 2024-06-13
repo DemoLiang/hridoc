@@ -11,9 +11,9 @@ info(
 
 // AddCertificateReq 证书添加请求
 type AddCertificateReq {
-    Name string //证书名称
-    Path string  //存储位置
-    UserId string // 证书持有人
+    Name string `json:"name"` //证书名称
+    Path string `json:"path"` //存储位置
+    UserId string `json:"userId"` // 证书持有人
 }
 
 type AddCertificateResp{
@@ -22,15 +22,15 @@ type AddCertificateResp{
 }
 
 type ListCertificateReq{
-    current int64
-    pageSize int64
+    current int64 `json:"current"`
+    pageSize int64 `json:"pageSize"`
 }
 
 type CertificateListData {
-    Id string
-    Name string//证书名称
-    Path string //存储位置
-    UserId string// 证书持有人
+    Id string `json:"id"`
+    Name string `json:"name"` //证书名称
+    Path string `json:"path"` //存储位置
+    UserId string `json:"userId"` // 证书持有人
 }
 
 type ListCertificateResp{
@@ -42,10 +42,10 @@ type ListCertificateResp{
 }
 
 type UpdateCertificateReq{
-    Id string //证书ID
-    Name string //证书名称
-    Path string //存储位置
-    UserId string// 证书持有人
+    Id string `json:"id"` //证书ID
+    Name string `json:"name"`//证书名称
+    Path string `json:"path"`//存储位置
+    UserId string `json:"userId"`// 证书持有人
 }
 
 type UpdateCertificateResp{
@@ -54,7 +54,7 @@ type UpdateCertificateResp{
 }
 
 type DeleteCertificateReq{
-    Id string //证书ID
+    Id string `json:"id"` //证书ID
 }
 
 type DeleteCertificateResp{
@@ -72,7 +72,7 @@ type DeleteCertificateResp{
     group: sys/hridoc
     prefix: /api/sys/hridoc/certificate
 )
-service admin-api {
+service api {
     @handler Add
     post /add (AddCertificateReq) returns (AddCertificateResp)
 

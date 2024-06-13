@@ -72,7 +72,7 @@ type (
 	group: sys/config
 	prefix: /api/sys/config
 )
-service admin-api {
+service api {
 	@handler ConfigAdd
 	post /add (addConfigReq) returns (addConfigResp)
 	

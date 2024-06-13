@@ -78,7 +78,7 @@ type (
 	group: sys/dict
 	prefix: /api/sys/dict
 )
-service admin-api {
+service api {
 	@handler DictAdd
 	post /add (addDictReq) returns (addDictResp)
 	

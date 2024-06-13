@@ -92,7 +92,7 @@ type (
 	group: sys/menu
 	prefix: /api/sys/menu
 )
-service admin-api {
+service api {
 
 	//新增菜单信息
 	@handler MenuAdd

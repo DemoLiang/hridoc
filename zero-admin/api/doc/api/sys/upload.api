@@ -17,7 +17,7 @@ type (
 	group: sys/upload
 	prefix: /api/sys
 )
-service admin-api {
+service api {
 	@handler Upload
 	post /upload returns (UploadResp)
 }

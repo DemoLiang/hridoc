@@ -66,7 +66,7 @@ type (
 	group: sys/dept
 	prefix: /api/sys/dept
 )
-service admin-api {
+service api {
 	@handler DeptAdd
 	post /add (addDeptReq) returns (addDeptResp)
 	

@@ -11,7 +11,6 @@ import "sys/upload.api"
 import "hridoc/category.api"
 import "hridoc/certificate.api"
 
-
 info (
 	desc:   "hridoc"
 	author: "demoliang"

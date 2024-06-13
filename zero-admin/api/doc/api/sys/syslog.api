@@ -46,7 +46,7 @@ type (
 	group: sys/log
 	prefix: /api/sys/sysLog
 )
-service admin-api {
+service api {
 	@handler SysLogList
 	post /list (ListSysLogReq) returns (ListSysLogResp)
 	

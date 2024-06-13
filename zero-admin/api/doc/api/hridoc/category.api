@@ -9,7 +9,7 @@ info(
 )
 
 type AddCertificateCategoryReq {
-    Name string //证书分类名称
+    Name string `json:"name"`//证书分类名称
 }
 
 type AddCertificateCategoryResp{
@@ -18,26 +18,40 @@ type AddCertificateCategoryResp{
 }
 
 type ListCertificateCategoryReq{
-    current int64
-    pageSize int64
+    current int64 `json:"current"`
+    pageSize int64 `json:"pageSize"`
+}
+
+type CertificateCategoryData {
+    Id string `json:"id"`
+    Name string `json:"name"`//证书分类名称
 }
 
 type CertificateCategoryListData {
-    Id string
-    Name string//证书分类名称
+    List []*CertificateCategoryData `json:"list"`
 }
 
 type ListCertificateCategoryResp{
     Code    string          `json:"code"`
     Message string          `json:"message"`
-    Data    []*CertificateCategoryListData `json:"data"`
+    Data    CertificateCategoryListData `json:"data"`
     Success bool            `json:"success"`
     Total   int64           `json:"total"`
 }
 
+type GetCertificateCategoryReq {
+    Id string `json:"id"`
+}
+
+type GetCertificateCategoryResp {
+    Code    string          `json:"code"`
+    Message string          `json:"message"`
+    Data    CertificateCategoryData `json:"data"`
+}
+
 type UpdateCertificateCategoryReq{
-    Id string //证书分类ID
-    Name string //证书分类名称
+    Id string  `json:"id"`//证书分类ID
+    Name string `json:"name"`//证书分类名称
 }
 
 type UpdateCertificateCategoryResp{
@@ -46,7 +60,7 @@ type UpdateCertificateCategoryResp{
 }
 
 type DeleteCertificateCategoryReq{
-    Id string //证书分类ID
+    Id string  `json:"id"`//证书分类ID
 }
 
 type DeleteCertificateCategoryResp{
@@ -60,7 +74,7 @@ type DeleteCertificateCategoryResp{
     group: sys/hridoc
     prefix: /api/sys/hridoc/category
 )
-service admin-api {
+service api {
     @handler Add
     // 增加证书类型
     post /add (AddCertificateCategoryReq) returns (AddCertificateCategoryResp)

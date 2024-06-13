@@ -59,7 +59,7 @@ type (
 	group: sys/log
 	prefix: /api/sys/loginLog
 )
-service admin-api {
+service api {
 	@handler LoginLogList
 	post /list (ListLoginLogReq) returns (ListLoginLogResp)
 	
