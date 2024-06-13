@@ -62,14 +62,22 @@ type DeleteCertificateCategoryResp{
 )
 service admin-api {
     @handler Add
+    // 增加证书类型
     post /add (AddCertificateCategoryReq) returns (AddCertificateCategoryResp)
 
+    // 查询证书类型列表
     @handler CertificateCategoryList
     post /list (ListCertificateCategoryReq) returns (ListCertificateCategoryResp)
 
+    // 查询证书类型
+    @handler GetCertificateCategory
+    post /get (GetCertificateCategoryReq) returns (GetCertificateCategoryResp)
+
+    // 更新证书类型列表
     @handler CertificateCategoryUpdate
     post /update (UpdateCertificateCategoryReq) returns (UpdateCertificateCategoryResp)
 
+    // 删除证书类型列表
     @handler CertificateCategoryDelete
     post /delete (DeleteCertificateCategoryReq) returns (DeleteCertificateCategoryResp)
 }

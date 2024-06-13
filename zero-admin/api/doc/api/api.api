@@ -8,6 +8,9 @@ import "sys/syslog.api"
 import "sys/config.api"
 import "sys/job.api"
 import "sys/upload.api"
+import "hridoc/category.api"
+import "hridoc/certificate.api"
+
 
 info (
 	desc:   "hridoc"
