@@ -80,7 +80,7 @@ service api {
     post /add (AddCertificateCategoryReq) returns (AddCertificateCategoryResp)
 
     // 查询证书类型列表
-    @handler CertificateCategoryList
+    @handler ListCertificateCategory
     post /list (ListCertificateCategoryReq) returns (ListCertificateCategoryResp)
 
     // 查询证书类型
@@ -88,10 +88,10 @@ service api {
     post /get (GetCertificateCategoryReq) returns (GetCertificateCategoryResp)
 
     // 更新证书类型列表
-    @handler CertificateCategoryUpdate
+    @handler UpdateCertificateCategory
     post /update (UpdateCertificateCategoryReq) returns (UpdateCertificateCategoryResp)
 
     // 删除证书类型列表
-    @handler CertificateCategoryDelete
+    @handler DeleteCertificateCategory
     post /delete (DeleteCertificateCategoryReq) returns (DeleteCertificateCategoryResp)
 }

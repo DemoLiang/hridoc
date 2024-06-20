@@ -9,16 +9,16 @@ import (
 	"zero-admin/api/internal/types"
 )
 
-func CertificateUpdateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func DeleteCertificateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateCertificateReq
+		var req types.DeleteCertificateReq
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := hridoc.NewCertificateUpdateLogic(r.Context(), svcCtx)
-		resp, err := l.CertificateUpdate(&req)
+		l := hridoc.NewDeleteCertificateLogic(r.Context(), svcCtx)
+		resp, err := l.DeleteCertificate(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

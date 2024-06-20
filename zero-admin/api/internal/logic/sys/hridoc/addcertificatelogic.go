@@ -9,21 +9,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type AddAddCertificateLogic struct {
+type AddCertificateLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewAddAddCertificateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAddCertificateLogic {
-	return &AddAddCertificateLogic{
+func NewAddCertificateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddCertificateLogic {
+	return &AddCertificateLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *AddAddCertificateLogic) AddAddCertificate(req *types.AddCertificateReq) (resp *types.AddCertificateResp, err error) {
+func (l *AddCertificateLogic) AddCertificate(req *types.AddCertificateReq) (resp *types.AddCertificateResp, err error) {
 	// todo: add your logic here and delete this line
 
 	return

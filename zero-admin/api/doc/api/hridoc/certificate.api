@@ -26,17 +26,20 @@ type ListCertificateReq{
     pageSize int64 `json:"pageSize"`
 }
 
-type CertificateListData {
+type CertificateData {
     Id string `json:"id"`
     Name string `json:"name"` //证书名称
     Path string `json:"path"` //存储位置
     UserId string `json:"userId"` // 证书持有人
 }
+type CertificateListData {
+    List []*CertificateData `json:"list"`
+}
 
 type ListCertificateResp{
     Code    string          `json:"code"`
     Message string          `json:"message"`
-    Data    []*CertificateListData `json:"data"`
+    Data    CertificateListData `json:"data"`
     Success bool            `json:"success"`
     Total   int64           `json:"total"`
 }
@@ -46,6 +49,16 @@ type UpdateCertificateReq{
     Name string `json:"name"`//证书名称
     Path string `json:"path"`//存储位置
     UserId string `json:"userId"`// 证书持有人
+}
+
+type GetCertificateReq {
+    Id string `json:"id"` //证书ID
+}
+
+type GetCertificateResp {
+    Code    string `json:"code"`
+    Message string `json:"message"`
+    Data *CertificateData `json:"data"`
 }
 
 type UpdateCertificateResp{
@@ -62,10 +75,6 @@ type DeleteCertificateResp{
     Message string `json:"message"`
 }
 
-
-
-
-
 @server(
     jwt: Auth
     middleware: CheckUrl
@@ -73,15 +82,18 @@ type DeleteCertificateResp{
     prefix: /api/sys/hridoc/certificate
 )
 service api {
-    @handler AddAddCertificate
+    @handler AddCertificate
     post /add (AddCertificateReq) returns (AddCertificateResp)
 
-    @handler CertificateList
+    @handler ListCertificate
     post /list (ListCertificateReq) returns (ListCertificateResp)
 
-    @handler CertificateUpdate
+    @handler GetCertificate
+    post /get (GetCertificateReq) returns (GetCertificateResp)
+
+    @handler UpdateCertificate
     post /update (UpdateCertificateReq) returns (UpdateCertificateResp)
 
-    @handler CertificateDelete
+    @handler DeleteCertificate
     post /delete (DeleteCertificateReq) returns (DeleteCertificateResp)
 }

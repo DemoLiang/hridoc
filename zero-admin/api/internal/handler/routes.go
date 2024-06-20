@@ -342,7 +342,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/list",
-					Handler: syshridoc.CertificateCategoryListHandler(serverCtx),
+					Handler: syshridoc.ListCertificateCategoryHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
@@ -352,12 +352,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/update",
-					Handler: syshridoc.CertificateCategoryUpdateHandler(serverCtx),
+					Handler: syshridoc.UpdateCertificateCategoryHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/delete",
-					Handler: syshridoc.CertificateCategoryDeleteHandler(serverCtx),
+					Handler: syshridoc.DeleteCertificateCategoryHandler(serverCtx),
 				},
 			}...,
 		),
@@ -372,22 +372,27 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/add",
-					Handler: syshridoc.AddAddCertificateHandler(serverCtx),
+					Handler: syshridoc.AddCertificateHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/list",
-					Handler: syshridoc.CertificateListHandler(serverCtx),
+					Handler: syshridoc.ListCertificateHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/get",
+					Handler: syshridoc.GetCertificateHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/update",
-					Handler: syshridoc.CertificateUpdateHandler(serverCtx),
+					Handler: syshridoc.UpdateCertificateHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/delete",
-					Handler: syshridoc.CertificateDeleteHandler(serverCtx),
+					Handler: syshridoc.DeleteCertificateHandler(serverCtx),
 				},
 			}...,
 		),

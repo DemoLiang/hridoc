@@ -9,7 +9,7 @@ import (
 	"zero-admin/api/internal/types"
 )
 
-func CertificateCategoryDeleteHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func DeleteCertificateCategoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.DeleteCertificateCategoryReq
 		if err := httpx.Parse(r, &req); err != nil {
@@ -17,8 +17,8 @@ func CertificateCategoryDeleteHandler(svcCtx *svc.ServiceContext) http.HandlerFu
 			return
 		}
 
-		l := hridoc.NewCertificateCategoryDeleteLogic(r.Context(), svcCtx)
-		resp, err := l.CertificateCategoryDelete(&req)
+		l := hridoc.NewDeleteCertificateCategoryLogic(r.Context(), svcCtx)
+		resp, err := l.DeleteCertificateCategory(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

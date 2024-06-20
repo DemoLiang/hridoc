@@ -9,16 +9,16 @@ import (
 	"zero-admin/api/internal/types"
 )
 
-func CertificateCategoryListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func AddCertificateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ListCertificateCategoryReq
+		var req types.AddCertificateReq
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := hridoc.NewCertificateCategoryListLogic(r.Context(), svcCtx)
-		resp, err := l.CertificateCategoryList(&req)
+		l := hridoc.NewAddCertificateLogic(r.Context(), svcCtx)
+		resp, err := l.AddCertificate(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

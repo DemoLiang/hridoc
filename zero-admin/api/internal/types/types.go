@@ -812,19 +812,23 @@ type ListCertificateReq struct {
 	PageSize int64 `json:"pageSize"`
 }
 
-type CertificateListData struct {
+type CertificateData struct {
 	Id     string `json:"id"`
 	Name   string `json:"name"`   //证书名称
 	Path   string `json:"path"`   //存储位置
 	UserId string `json:"userId"` // 证书持有人
 }
 
+type CertificateListData struct {
+	List []*CertificateData `json:"list"`
+}
+
 type ListCertificateResp struct {
-	Code    string                 `json:"code"`
-	Message string                 `json:"message"`
-	Data    []*CertificateListData `json:"data"`
-	Success bool                   `json:"success"`
-	Total   int64                  `json:"total"`
+	Code    string              `json:"code"`
+	Message string              `json:"message"`
+	Data    CertificateListData `json:"data"`
+	Success bool                `json:"success"`
+	Total   int64               `json:"total"`
 }
 
 type UpdateCertificateReq struct {
@@ -832,6 +836,16 @@ type UpdateCertificateReq struct {
 	Name   string `json:"name"`   //证书名称
 	Path   string `json:"path"`   //存储位置
 	UserId string `json:"userId"` // 证书持有人
+}
+
+type GetCertificateReq struct {
+	Id string `json:"id"` //证书ID
+}
+
+type GetCertificateResp struct {
+	Code    string           `json:"code"`
+	Message string           `json:"message"`
+	Data    *CertificateData `json:"data"`
 }
 
 type UpdateCertificateResp struct {
