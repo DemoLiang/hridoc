@@ -5,10 +5,12 @@ package logic
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/DemoLiang/hridoc/api/internal/svc"
 	"github.com/DemoLiang/hridoc/api/internal/types"
-
+	"github.com/DemoLiang/hridoc/api/model"
+	"github.com/DemoLiang/hridoc/api/pkg/errorx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -27,7 +29,25 @@ func NewAddCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddCa
 }
 
 func (l *AddCategoryLogic) AddCategory(req *types.AddCategoryReq) (resp *types.BaseResp, err error) {
-	// todo: add your logic here and delete this line
+	_, err = l.svcCtx.CertCategoryModel.FindOneByCode(l.ctx, req.Code)
+	if err == nil {
+		return &types.BaseResp{Code: errorx.ErrIdCardExists, Message: "证件类型编码已存在"}, nil
+	}
+	if !errorx.IsNotFound(err) {
+		logx.Errorf("query category failed: %v", err)
+		return &types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"}, nil
+	}
 
-	return
+	_, err = l.svcCtx.CertCategoryModel.Insert(l.ctx, &model.CertCategory{
+		Name:        req.Name,
+		Code:        req.Code,
+		Description: sql.NullString{String: req.Description, Valid: req.Description != ""},
+		Status:      1,
+	})
+	if err != nil {
+		logx.Errorf("insert category failed: %v", err)
+		return &types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"}, nil
+	}
+
+	return &types.BaseResp{Code: 0, Message: "success"}, nil
 }

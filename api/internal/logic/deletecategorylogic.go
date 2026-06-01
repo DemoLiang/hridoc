@@ -8,7 +8,7 @@ import (
 
 	"github.com/DemoLiang/hridoc/api/internal/svc"
 	"github.com/DemoLiang/hridoc/api/internal/types"
-
+	"github.com/DemoLiang/hridoc/api/pkg/errorx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -27,7 +27,14 @@ func NewDeleteCategoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 }
 
 func (l *DeleteCategoryLogic) DeleteCategory(req *types.DeleteReq) (resp *types.BaseResp, err error) {
-	// todo: add your logic here and delete this line
+	err = l.svcCtx.CertCategoryModel.Delete(l.ctx, req.Id)
+	if err != nil {
+		if errorx.IsNotFound(err) {
+			return &types.BaseResp{Code: errorx.ErrCategoryNotFound, Message: "证件类型不存在"}, nil
+		}
+		logx.Errorf("delete category failed: %v", err)
+		return &types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"}, nil
+	}
 
-	return
+	return &types.BaseResp{Code: 0, Message: "success"}, nil
 }

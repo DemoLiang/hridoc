@@ -8,7 +8,7 @@ import (
 
 	"github.com/DemoLiang/hridoc/api/internal/svc"
 	"github.com/DemoLiang/hridoc/api/internal/types"
-
+	"github.com/DemoLiang/hridoc/api/pkg/errorx"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -26,8 +26,31 @@ func NewGetCategoryDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *GetCategoryDetailLogic) GetCategoryDetail(req *types.UserDetailReq) (resp *types.BaseResp, err error) {
-	// todo: add your logic here and delete this line
+func (l *GetCategoryDetailLogic) GetCategoryDetail(req *types.UserDetailReq) (resp *types.CategoryListResp, err error) {
+	cat, err := l.svcCtx.CertCategoryModel.FindOne(l.ctx, req.Id)
+	if err != nil {
+		if errorx.IsNotFound(err) {
+			return &types.CategoryListResp{
+				BaseResp: types.BaseResp{Code: errorx.ErrCategoryNotFound, Message: "证件类型不存在"},
+			}, nil
+		}
+		logx.Errorf("get category detail failed: %v", err)
+		return &types.CategoryListResp{
+			BaseResp: types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"},
+		}, nil
+	}
 
-	return
+	return &types.CategoryListResp{
+		BaseResp: types.BaseResp{Code: 0, Message: "success"},
+		Data: types.CategoryListData{
+			PageResp: types.PageResp{Total: 1, Page: 1},
+			List: []types.CategoryInfo{{
+				Id:          cat.Id,
+				Name:        cat.Name,
+				Code:        cat.Code,
+				Description: nullString(cat.Description),
+				Status:      cat.Status,
+			}},
+		},
+	}, nil
 }
