@@ -126,25 +126,24 @@ func (l *CreateExportTaskLogic) processExport(taskId int64, req *types.ExportTas
 
 	url := l.svcCtx.MinIO.ObjectURL(objectName)
 	now := time.Now()
-	_, _ = l.svcCtx.ExportTaskModel.Insert(ctx, &model.ExportTask{
-		Id:        taskId,
-		TaskName:  sql.NullString{String: fmt.Sprintf("导出任务_%s", time.Now().Format("20060102150405")), Valid: true},
-		UserCount: int64(len(users)),
-		CertCount: certCount,
-		MissCount: missCount,
-		FileUrl:   sql.NullString{String: url, Valid: true},
-		Status:    2,
-		CreatedAt: now,
-		CompletedAt: sql.NullTime{Time: now, Valid: true},
-	})
+	_, err = l.svcCtx.DB.ExecCtx(ctx,
+		`update export_task set task_name=?, user_count=?, cert_count=?, miss_count=?, file_url=?, status=?, completed_at=? where id=?`,
+		fmt.Sprintf("导出任务_%s", time.Now().Format("20060102150405")),
+		int64(len(users)), certCount, missCount, url, 2, now, taskId,
+	)
+	if err != nil {
+		logx.Errorf("update export task success status failed: %v", err)
+	}
 }
 
 func (l *CreateExportTaskLogic) updateTaskFailed(ctx context.Context, taskId int64, reason string) {
-	_, _ = l.svcCtx.ExportTaskModel.Insert(ctx, &model.ExportTask{
-		Id:         taskId,
-		Status:     3,
-		FailReason: sql.NullString{String: reason, Valid: true},
-	})
+	_, err := l.svcCtx.DB.ExecCtx(ctx,
+		`update export_task set status=?, fail_reason=? where id=?`,
+		3, reason, taskId,
+	)
+	if err != nil {
+		logx.Errorf("update export task failed status failed: %v", err)
+	}
 }
 
 func (l *CreateExportTaskLogic) buildPreviewData(ctx context.Context, req *types.ExportTaskReq) ([]types.PreviewUser, int64, int64, error) {
