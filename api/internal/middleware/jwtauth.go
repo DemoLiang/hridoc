@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -18,14 +17,20 @@ func JWTAuth(cfg config.Config) func(http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("Authorization")
 			if len(token) < 7 || token[:7] != "Bearer " {
-				httpx.Error(w, httpx.NewError(401, "missing or invalid authorization header"))
+				httpx.WriteJson(w, http.StatusUnauthorized, map[string]any{
+					"code":    401,
+					"message": "missing or invalid authorization header",
+				})
 				return
 			}
 
 			claims, err := jwtUtil.ParseToken(token[7:])
 			if err != nil {
 				logx.Errorf("JWT parse failed: %v", err)
-				httpx.Error(w, httpx.NewError(401, "invalid token"))
+				httpx.WriteJson(w, http.StatusUnauthorized, map[string]any{
+					"code":    401,
+					"message": "invalid token",
+				})
 				return
 			}
 

@@ -12,6 +12,7 @@ const (
 	ErrIdCardExists     = 20002
 	ErrPassword         = 20003
 	ErrTokenInvalid     = 20004
+	ErrUserExists       = 20005
 	ErrCategoryNotFound = 30001
 	ErrCertNotFound     = 30002
 	ErrExcelFormat      = 40001

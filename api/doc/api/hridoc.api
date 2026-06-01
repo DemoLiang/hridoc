@@ -1,0 +1,427 @@
+syntax = "v1"
+
+info (
+	title:   "hridoc API"
+	desc:    "hridoc 员工证件管理系统 API"
+	author:  "hridoc"
+	version: "1.0"
+)
+
+type BaseResp {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type PageReq {
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"pageSize,default=10"`
+}
+
+type PageResp {
+	Total int64 `json:"total"`
+	Page  int64 `json:"page"`
+}
+
+// ========== 登录 ==========
+type LoginReq {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginResp {
+	BaseResp
+	Data LoginData `json:"data"`
+}
+
+type LoginData {
+	Token  string `json:"token"`
+	Expire int64  `json:"expire"`
+}
+
+// ========== 用户信息 ==========
+type UserInfo {
+	Id        int64  `json:"id"`
+	Name      string `json:"name"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+	IdCard    string `json:"idCard"`
+	Education string `json:"education"`
+	Role      int64  `json:"role"`
+	Status    int64  `json:"status"`
+}
+
+type UserInfoResp {
+	BaseResp
+	Data UserInfo `json:"data"`
+}
+
+// ========== 用户管理 ==========
+type UserListReq {
+	PageReq
+	Keyword string `form:"keyword,optional"`
+}
+
+type UserListResp {
+	BaseResp
+	Data UserListData `json:"data"`
+}
+
+type UserListData {
+	PageResp
+	List []UserInfo `json:"list"`
+}
+
+type UserDetailReq {
+	Id int64 `path:"id"`
+}
+
+type AddUserReq {
+	Name      string `json:"name"`
+	Phone     string `json:"phone,optional"`
+	Email     string `json:"email,optional"`
+	IdCard    string `json:"idCard"`
+	Education string `json:"education,optional"`
+	Role      int64  `json:"role"`
+	Password  string `json:"password"`
+}
+
+type UpdateUserReq {
+	Id        int64  `json:"id"`
+	Name      string `json:"name"`
+	Phone     string `json:"phone,optional"`
+	Email     string `json:"email,optional"`
+	IdCard    string `json:"idCard"`
+	Education string `json:"education,optional"`
+	Role      int64  `json:"role"`
+	Status    int64  `json:"status"`
+	Password  string `json:"password,optional"`
+}
+
+type DeleteReq {
+	Id int64 `json:"id"`
+}
+
+// ========== 证件类型 ==========
+type CategoryInfo {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	Status      int64  `json:"status"`
+}
+
+type CategoryListReq {
+	PageReq
+	Keyword string `form:"keyword,optional"`
+}
+
+type CategoryListResp {
+	BaseResp
+	Data CategoryListData `json:"data"`
+}
+
+type CategoryListData {
+	PageResp
+	List []CategoryInfo `json:"list"`
+}
+
+type AddCategoryReq {
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Description string `json:"description,optional"`
+}
+
+type UpdateCategoryReq {
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Description string `json:"description,optional"`
+	Status      int64  `json:"status"`
+}
+
+// ========== 证件管理 ==========
+type CertificateInfo {
+	Id           int64  `json:"id"`
+	UserId       int64  `json:"userId"`
+	UserName     string `json:"userName"`
+	CategoryId   int64  `json:"categoryId"`
+	CategoryName string `json:"categoryName"`
+	Name         string `json:"name"`
+	CertNo       string `json:"certNo"`
+	Issuer       string `json:"issuer"`
+	IssueDate    string `json:"issueDate"`
+	ExpireDate   string `json:"expireDate"`
+	Level        string `json:"level"`
+	FileUrl      string `json:"fileUrl"`
+	FileType     string `json:"fileType"`
+	ThumbUrl     string `json:"thumbUrl"`
+	Status       int64  `json:"status"`
+}
+
+type CertListReq {
+	PageReq
+	UserId     int64  `form:"userId,optional"`
+	CategoryId int64  `form:"categoryId,optional"`
+	Keyword    string `form:"keyword,optional"`
+}
+
+type CertListResp {
+	BaseResp
+	Data CertListData `json:"data"`
+}
+
+type CertListData {
+	PageResp
+	List []CertificateInfo `json:"list"`
+}
+
+type CertDetailReq {
+	Id int64 `path:"id"`
+}
+
+type AddCertReq {
+	UserId     int64  `json:"userId"`
+	CategoryId int64  `json:"categoryId"`
+	Name       string `json:"name"`
+	CertNo     string `json:"certNo,optional"`
+	Issuer     string `json:"issuer,optional"`
+	IssueDate  string `json:"issueDate,optional"`
+	ExpireDate string `json:"expireDate,optional"`
+	Level      string `json:"level,optional"`
+	FileUrl    string `json:"fileUrl"`
+	FileType   string `json:"fileType"`
+}
+
+type UpdateCertReq {
+	Id         int64  `json:"id"`
+	CategoryId int64  `json:"categoryId"`
+	Name       string `json:"name"`
+	CertNo     string `json:"certNo,optional"`
+	Issuer     string `json:"issuer,optional"`
+	IssueDate  string `json:"issueDate,optional"`
+	ExpireDate string `json:"expireDate,optional"`
+	Level      string `json:"level,optional"`
+	FileUrl    string `json:"fileUrl,optional"`
+	FileType   string `json:"fileType,optional"`
+	Status     int64  `json:"status"`
+}
+
+// ========== 文件上传 ==========
+type UploadReq {
+	File []byte `form:"file"`
+}
+
+type UploadResp {
+	BaseResp
+	Data UploadData `json:"data"`
+}
+
+type UploadData {
+	Url      string `json:"url"`
+	FileType string `json:"fileType"`
+}
+
+// ========== Excel 导入 ==========
+type ExcelImportReq {
+	File []byte `form:"file"`
+}
+
+type ExcelImportResp {
+	BaseResp
+	Data ExcelImportData `json:"data"`
+}
+
+type ExcelImportData {
+	Total    int64           `json:"total"`
+	Success  int64           `json:"success"`
+	Failed   int64           `json:"failed"`
+	FailList []ExcelFailItem `json:"failList"`
+}
+
+type ExcelFailItem {
+	Row    int64  `json:"row"`
+	Reason string `json:"reason"`
+	Data   string `json:"data"`
+}
+
+// ========== 预览 ==========
+type PreviewReq {
+	UserIds       []int64  `json:"userIds"`
+	CategoryCodes []string `json:"categoryCodes"`
+}
+
+type PreviewResp {
+	BaseResp
+	Data PreviewData `json:"data"`
+}
+
+type PreviewData {
+	Users []PreviewUser `json:"users"`
+}
+
+type PreviewUser {
+	UserId     int64             `json:"userId"`
+	UserName   string            `json:"userName"`
+	Categories []PreviewCategory `json:"categories"`
+}
+
+type PreviewCategory {
+	CategoryCode string `json:"categoryCode"`
+	CategoryName string `json:"categoryName"`
+	HasCert      bool   `json:"hasCert"`
+	CertId       int64  `json:"certId"`
+	CertName     string `json:"certName"`
+}
+
+// ========== 导出任务 ==========
+type ExportTaskReq {
+	PreviewReq
+	WatermarkText string `json:"watermarkText,optional"`
+}
+
+type ExportTaskResp {
+	BaseResp
+	Data ExportTaskData `json:"data"`
+}
+
+type ExportTaskData {
+	TaskId int64 `json:"taskId"`
+}
+
+type TaskStatusReq {
+	Id int64 `path:"id"`
+}
+
+type TaskStatusResp {
+	BaseResp
+	Data TaskStatusData `json:"data"`
+}
+
+type TaskStatusData {
+	Id          int64  `json:"id"`
+	TaskName    string `json:"taskName"`
+	UserCount   int64  `json:"userCount"`
+	CertCount   int64  `json:"certCount"`
+	MissCount   int64  `json:"missCount"`
+	Status      int64  `json:"status"`
+	FailReason  string `json:"failReason"`
+	FileUrl     string `json:"fileUrl"`
+	CreatedAt   string `json:"createdAt"`
+	CompletedAt string `json:"completedAt"`
+}
+
+type TaskListReq {
+	PageReq
+}
+
+type TaskListResp {
+	BaseResp
+	Data TaskListData `json:"data"`
+}
+
+type TaskListData {
+	PageResp
+	List []TaskStatusData `json:"list"`
+}
+
+// ========== 模板下载 ==========
+type TemplateResp {
+	BaseResp
+	Data TemplateData `json:"data"`
+}
+
+type TemplateData {
+	Url string `json:"url"`
+}
+
+// ========== 清理 ==========
+type CleanResp {
+	BaseResp
+	Data CleanData `json:"data"`
+}
+
+type CleanData {
+	DeletedFiles int64 `json:"deletedFiles"`
+}
+
+// ========== 服务定义 ==========
+service hridoc-api {
+	@handler login
+	post /api/login (LoginReq) returns (LoginResp)
+
+	@handler getUserInfo
+	get /api/user/info returns (UserInfoResp)
+
+	@handler getUserList
+	get /api/user/list (UserListReq) returns (UserListResp)
+
+	@handler getUserDetail
+	get /api/user/detail/:id (UserDetailReq) returns (UserInfoResp)
+
+	@handler addUser
+	post /api/user/add (AddUserReq) returns (BaseResp)
+
+	@handler updateUser
+	post /api/user/update (UpdateUserReq) returns (BaseResp)
+
+	@handler deleteUser
+	post /api/user/delete (DeleteReq) returns (BaseResp)
+
+	@handler getCategoryList
+	get /api/category/list (CategoryListReq) returns (CategoryListResp)
+
+	@handler getCategoryDetail
+	get /api/category/detail/:id (UserDetailReq) returns (BaseResp)
+
+	@handler addCategory
+	post /api/category/add (AddCategoryReq) returns (BaseResp)
+
+	@handler updateCategory
+	post /api/category/update (UpdateCategoryReq) returns (BaseResp)
+
+	@handler deleteCategory
+	post /api/category/delete (DeleteReq) returns (BaseResp)
+
+	@handler getCertList
+	get /api/cert/list (CertListReq) returns (CertListResp)
+
+	@handler getCertDetail
+	get /api/cert/detail/:id (CertDetailReq) returns (BaseResp)
+
+	@handler addCert
+	post /api/cert/add (AddCertReq) returns (BaseResp)
+
+	@handler updateCert
+	post /api/cert/update (UpdateCertReq) returns (BaseResp)
+
+	@handler deleteCert
+	post /api/cert/delete (DeleteReq) returns (BaseResp)
+
+	@handler uploadFile
+	post /api/upload (UploadReq) returns (UploadResp)
+
+	@handler importExcel
+	post /api/excel/import (ExcelImportReq) returns (ExcelImportResp)
+
+	@handler downloadTemplate
+	get /api/excel/template returns (TemplateResp)
+
+	@handler preview
+	post /api/preview (PreviewReq) returns (PreviewResp)
+
+	@handler createExportTask
+	post /api/export (ExportTaskReq) returns (ExportTaskResp)
+
+	@handler getTaskStatus
+	get /api/task/status/:id (TaskStatusReq) returns (TaskStatusResp)
+
+	@handler getTaskList
+	get /api/task/list (TaskListReq) returns (TaskListResp)
+
+	@handler getTaskDownload
+	get /api/task/download/:id (TaskStatusReq) returns (BaseResp)
+
+	@handler cleanOldExports
+	post /api/clean returns (CleanResp)
+}
+
