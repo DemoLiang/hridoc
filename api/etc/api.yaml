@@ -1,0 +1,42 @@
+Name: hridoc-api
+Host: 0.0.0.0
+Port: 8888
+
+Mysql:
+  DataSource: root:root@tcp(localhost:3306)/hridoc?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+CacheRedis:
+  - Host: localhost:6379
+    Pass: ""
+    Type: node
+
+JwtAuth:
+  AccessSecret: hridoc-secret-key-change-in-production
+  AccessExpire: 86400
+
+MinIO:
+  Endpoint: localhost:9000
+  AccessKey: minio
+  SecretKey: minio123
+  Bucket: hridoc-bucket
+  UseSSL: false
+  PresignedExpiry: 300
+
+Watermark:
+  FontPath: ./fonts/simhei.ttf
+  DefaultText: "仅供公司内部使用"
+
+Upload:
+  MaxFileSize: 10485760
+  AllowedTypes:
+    - image/jpeg
+    - image/png
+    - image/jpg
+    - application/pdf
+
+Excel:
+  MaxRows: 1000
+
+Export:
+  TempDir: ./tmp/exports
+  CleanupDays: 7
