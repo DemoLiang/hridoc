@@ -5,6 +5,15 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+type MinIO struct {
+	Endpoint        string
+	AccessKey       string
+	SecretKey       string
+	Bucket          string
+	UseSSL          bool
+	PresignedExpiry int
+}
+
 type Config struct {
 	rest.RestConf
 	Mysql struct {
@@ -15,14 +24,7 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64
 	}
-	MinIO struct {
-		Endpoint        string
-		AccessKey       string
-		SecretKey       string
-		Bucket          string
-		UseSSL          bool
-		PresignedExpiry int
-	}
+	MinIO MinIO
 	Watermark struct {
 		FontPath    string
 		DefaultText string
