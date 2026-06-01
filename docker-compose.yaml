@@ -1,45 +1,67 @@
-version: "3"
+version: "3.8"
+
 services:
   mysql:
     image: mysql:5.7
+    container_name: hridoc-mysql
     ports:
-      - 13306:3306
-      - 23306:33060
-    container_name: mysql
+      - "13306:3306"
     volumes:
       - ${DATA_DIR}/mysql/data:/var/lib/mysql
-      - /etc/localtime:/etc/localtime
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
       MYSQL_ROOT_PASSWORD: ${PASSWORD}
+      MYSQL_DATABASE: hridoc
     restart: always
-    command: --log-bin=mysql-bin --server-id=1 --binlog-format=ROW --binlog-do-db=BTCloudIM
 
   redis:
-    image: redis
+    image: redis:7-alpine
+    container_name: hridoc-redis
     ports:
-      - 16379:6379
-    container_name: redis
-    volumes:
-      - ${DATA_DIR}/redis/data:/data
-      #redis config file
-      - ${DATA_DIR}/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - "16379:6379"
     environment:
       TZ: Asia/Shanghai
     restart: always
-    sysctls:
-      net.core.somaxconn: 1024
     command: redis-server --requirepass ${PASSWORD} --appendonly yes
 
-  etcd:
-    image: quay.io/coreos/etcd
+  minio:
+    image: minio/minio:latest
+    container_name: hridoc-minio
     ports:
-      - 2379:2379
-      - 2380:2380
-    container_name: etcd
+      - "19000:9000"
+      - "19001:9001"
     volumes:
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
+      - ${DATA_DIR}/minio:/data
     environment:
-      ETCDCTL_API: 3
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
     restart: always
-    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+    command: server /data --console-address ":9001"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: hridoc-api
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./api/etc/api.yaml:/app/etc/api.yaml:ro
+      - ${DATA_DIR}/fonts:/app/fonts:ro
+      - ${DATA_DIR}/tmp:/tmp/hridoc
+    environment:
+      TZ: Asia/Shanghai
+    depends_on:
+      - mysql
+      - redis
+      - minio
+    restart: always
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: hridoc-web
+    ports:
+      - "80:80"
+    restart: always
