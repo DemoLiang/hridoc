@@ -108,6 +108,15 @@ type CleanResp struct {
 	Data CleanData `json:"data"`
 }
 
+type DownloadData struct {
+	Url string `json:"url"`
+}
+
+type DownloadResp struct {
+	BaseResp
+	Data DownloadData `json:"data"`
+}
+
 type DeleteReq struct {
 	Id int64 `json:"id"`
 }
