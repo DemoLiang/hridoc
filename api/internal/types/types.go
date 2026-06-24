@@ -28,8 +28,8 @@ type AddUserReq struct {
 	Email     string `json:"email,optional"`
 	IdCard    string `json:"idCard"`
 	Education string `json:"education,optional"`
-	Role      int64  `json:"role"`
-	Password  string `json:"password"`
+	Role      int64  `json:"role,optional"`
+	Password  string `json:"password,optional"`
 }
 
 type BaseResp struct {
@@ -112,6 +112,10 @@ type DownloadData struct {
 	Url string `json:"url"`
 }
 
+type DownloadUrlData struct {
+	Url string `json:"url"`
+}
+
 type DownloadResp struct {
 	BaseResp
 	Data DownloadData `json:"data"`
@@ -119,6 +123,23 @@ type DownloadResp struct {
 
 type DeleteReq struct {
 	Id int64 `json:"id"`
+}
+
+type BatchDeleteReq struct {
+	Ids []int64 `json:"ids"`
+}
+
+type CertPreviewReq struct {
+	FileUrl string `json:"fileUrl"`
+}
+
+type PreviewUrlData struct {
+	Url string `json:"url"`
+}
+
+type PreviewUrlResp struct {
+	BaseResp
+	Data PreviewUrlData `json:"data"`
 }
 
 type ExcelFailItem struct {
@@ -148,8 +169,13 @@ type ExportTaskData struct {
 }
 
 type ExportTaskReq struct {
-	PreviewReq
-	WatermarkText string `json:"watermarkText,optional"`
+	CategoryCodes  []string `json:"categoryCodes"`
+	WatermarkText  string   `json:"watermarkText,optional"`
+	WatermarkMode     string   `json:"watermarkMode,optional"`
+	WatermarkColor    string   `json:"watermarkColor,optional"`
+	WatermarkOpacity  float64  `json:"watermarkOpacity,optional"`
+	WatermarkFontSize int      `json:"watermarkFontSize,optional"`
+	UserIds           []int64  `json:"userIds,optional"`
 }
 
 type ExportTaskResp struct {
@@ -160,6 +186,10 @@ type ExportTaskResp struct {
 type LoginData struct {
 	Token  string `json:"token"`
 	Expire int64  `json:"expire"`
+}
+
+type LogoutResp struct {
+	BaseResp
 }
 
 type LoginReq struct {
@@ -195,7 +225,6 @@ type PreviewData struct {
 }
 
 type PreviewReq struct {
-	UserIds       []int64  `json:"userIds"`
 	CategoryCodes []string `json:"categoryCodes"`
 }
 
@@ -208,6 +237,30 @@ type PreviewUser struct {
 	UserId     int64             `json:"userId"`
 	UserName   string            `json:"userName"`
 	Categories []PreviewCategory `json:"categories"`
+}
+
+type ExcelPreviewUser struct {
+	RowIndex    int               `json:"rowIndex"`    // Excel 行号（从2开始）
+	Name        string            `json:"name"`        // Excel 中的姓名
+	IdCard      string            `json:"idCard"`      // Excel 中的身份证号
+	MatchStatus int               `json:"matchStatus"` // 0-未匹配 1-身份证号匹配 2-姓名匹配 3-重名无法匹配
+	UserId      int64             `json:"userId"`      // 匹配到的系统用户ID
+	UserName    string            `json:"userName"`    // 系统用户姓名
+	Categories  []PreviewCategory `json:"categories"`  // 每个证件类型的匹配情况
+	MissReason  string            `json:"missReason"`  // 缺证或匹配失败原因
+}
+
+type ExcelPreviewData struct {
+	TotalCount     int                `json:"totalCount"`
+	MatchedCount   int                `json:"matchedCount"`   // 至少匹配到一个证件
+	MissCount      int                `json:"missCount"`      // 匹配到用户但无证件
+	UnmatchedCount int                `json:"unmatchedCount"` // 未匹配到用户
+	Users          []ExcelPreviewUser `json:"users"`
+}
+
+type ExcelPreviewResp struct {
+	BaseResp
+	Data ExcelPreviewData `json:"data"`
 }
 
 type TaskListData struct {
@@ -284,13 +337,14 @@ type UpdateUserReq struct {
 	Email     string `json:"email,optional"`
 	IdCard    string `json:"idCard"`
 	Education string `json:"education,optional"`
-	Role      int64  `json:"role"`
+	Role      int64  `json:"role,optional"`
 	Status    int64  `json:"status"`
 	Password  string `json:"password,optional"`
 }
 
 type UploadData struct {
 	Url      string `json:"url"`
+	ThumbUrl string `json:"thumbUrl"`
 	FileType string `json:"fileType"`
 }
 
@@ -336,4 +390,33 @@ type UserListReq struct {
 type UserListResp struct {
 	BaseResp
 	Data UserListData `json:"data"`
+}
+
+type OperationLogInfo struct {
+	Id           int64  `json:"id"`
+	OperatorId   int64  `json:"operatorId"`
+	OperatorName string `json:"operatorName"`
+	Module       string `json:"module"`
+	Action       string `json:"action"`
+	Target       string `json:"target"`
+	Detail       string `json:"detail"`
+	Ip           string `json:"ip"`
+	CreatedAt    string `json:"createdAt"`
+}
+
+type OperationLogListReq struct {
+	PageReq
+	Module     string `form:"module,optional"`
+	Action     string `form:"action,optional"`
+	OperatorId int64  `form:"operatorId,optional"`
+}
+
+type OperationLogListData struct {
+	PageResp
+	List []OperationLogInfo `json:"list"`
+}
+
+type OperationLogListResp struct {
+	BaseResp
+	Data OperationLogListData `json:"data"`
 }

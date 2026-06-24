@@ -1,12 +1,14 @@
 package svc
 
 import (
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/DemoLiang/hridoc/api/internal/config"
 	"github.com/DemoLiang/hridoc/api/model"
 	"github.com/DemoLiang/hridoc/api/pkg/minio"
+	"github.com/DemoLiang/hridoc/api/pkg/watermark"
 )
 
 type ServiceContext struct {
@@ -33,6 +35,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		// MinIO 连接失败不应阻止服务启动，记录错误但继续
 		// 实际生产代码中可以改为 panic 或更严格的处理
 		minioClient = nil
+	}
+
+	// 初始化水印字体
+	if err := watermark.InitFont(c.Watermark.FontPath); err != nil {
+		logx.Errorf("init watermark font failed: %v", err)
 	}
 
 	return &ServiceContext{

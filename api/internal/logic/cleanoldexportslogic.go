@@ -5,6 +5,7 @@ package logic
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -38,8 +39,8 @@ func (l *CleanOldExportsLogic) CleanOldExports() (resp *types.CleanResp, err err
 
 	query := fmt.Sprintf("select id, file_url from export_task where (status = 2 or status = 3) and created_at < '%s'", cutoff)
 	var rows []struct {
-		Id     int64  `db:"id"`
-		FileUrl string `db:"file_url"`
+		Id      int64          `db:"id"`
+		FileUrl sql.NullString `db:"file_url"`
 	}
 	if err = l.svcCtx.DB.QueryRowsPartialCtx(l.ctx, &rows, query); err != nil {
 		logx.Errorf("query old exports failed: %v", err)
@@ -50,8 +51,8 @@ func (l *CleanOldExportsLogic) CleanOldExports() (resp *types.CleanResp, err err
 
 	var deleted int64
 	for _, r := range rows {
-		if r.FileUrl != "" {
-			objectName := l.extractObjectName(r.FileUrl)
+		if r.FileUrl.Valid && r.FileUrl.String != "" {
+			objectName := l.extractObjectName(r.FileUrl.String)
 			if objectName != "" {
 				if err := l.svcCtx.MinIO.RemoveObject(l.ctx, objectName); err != nil {
 					logx.Errorf("remove minio object failed: %v", err)

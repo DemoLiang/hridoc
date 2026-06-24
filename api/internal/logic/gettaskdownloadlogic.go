@@ -5,6 +5,8 @@ package logic
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -61,6 +63,39 @@ func (l *GetTaskDownloadLogic) GetTaskDownload(req *types.TaskStatusReq) (resp *
 		BaseResp: types.BaseResp{Code: 0, Message: "success"},
 		Data:     types.DownloadData{Url: url},
 	}, nil
+}
+
+func (l *GetTaskDownloadLogic) GetTaskDownloadFile(req *types.TaskStatusReq) (io.ReadCloser, string, string, error) {
+	task, err := l.svcCtx.ExportTaskModel.FindOne(l.ctx, req.Id)
+	if err != nil {
+		if errorx.IsNotFound(err) {
+			return nil, "", "", fmt.Errorf("任务不存在")
+		}
+		logx.Errorf("find export task failed: %v", err)
+		return nil, "", "", fmt.Errorf("系统错误")
+	}
+
+	if task.Status != 2 {
+		return nil, "", "", fmt.Errorf("任务尚未完成")
+	}
+
+	if !task.FileUrl.Valid || task.FileUrl.String == "" {
+		return nil, "", "", fmt.Errorf("下载链接不存在")
+	}
+
+	objectName := l.extractObjectName(task.FileUrl.String)
+	if objectName == "" {
+		return nil, "", "", fmt.Errorf("无效的文件链接")
+	}
+
+	reader, err := l.svcCtx.MinIO.GetObject(l.ctx, objectName)
+	if err != nil {
+		logx.Errorf("get object from minio failed: %v", err)
+		return nil, "", "", fmt.Errorf("获取文件失败")
+	}
+
+	filename := fmt.Sprintf("task_%d.zip", req.Id)
+	return reader, filename, "application/zip", nil
 }
 
 func (l *GetTaskDownloadLogic) extractObjectName(fileUrl string) string {

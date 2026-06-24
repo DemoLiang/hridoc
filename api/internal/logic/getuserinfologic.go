@@ -5,7 +5,6 @@ package logic
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/DemoLiang/hridoc/api/internal/middleware"
 	"github.com/DemoLiang/hridoc/api/internal/svc"
@@ -55,11 +54,4 @@ func (l *GetUserInfoLogic) GetUserInfo() (resp *types.UserInfoResp, err error) {
 			Status:    user.Status,
 		},
 	}, nil
-}
-
-func nullString(s sql.NullString) string {
-	if s.Valid {
-		return s.String
-	}
-	return ""
 }

@@ -198,9 +198,9 @@ POST   /api/certificate/delete           删除证件
 GET    /api/certificate/preview/:id      证件预览（返回文件URL）
 GET    /api/certificate/thumb/:id        证件缩略图（返回缩略图URL）
 
-POST   /api/export/import                上传 Excel 名单
-POST   /api/export/preview               预览匹配结果
-POST   /api/export/download              确认导出（异步模式）
+POST   /api/export/import                上传 Excel 名单（multipart form）
+POST   /api/export/preview               预览匹配结果（multipart form）
+POST   /api/export/download              确认导出（multipart form + 异步模式）
 GET    /api/export/task/:id              查询导出任务状态
 GET    /api/export/task-list             导出历史列表
 POST   /api/export/retry/:id             重试失败的导出任务

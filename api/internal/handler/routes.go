@@ -12,18 +12,34 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next(w, r)
+	}
+}
+
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	jwt := middleware.JWTAuth(serverCtx.Config)
+	opLog := middleware.OperationLog(serverCtx)
+	cors := rest.Middleware(corsMiddleware)
 
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/api/login",
-				Handler: loginHandler(serverCtx),
-			},
-		},
-	)
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{cors}, rest.Route{
+		Method:  http.MethodPost,
+		Path:    "/api/login",
+		Handler: loginHandler(serverCtx),
+	}))
 
 	protectedRoutes := []rest.Route{
 		{
@@ -62,6 +78,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			Handler: deleteCertHandler(serverCtx),
 		},
 		{
+			Method:  http.MethodPost,
+			Path:    "/api/cert/delete/batch",
+			Handler: batchDeleteCertHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/api/cert/preview",
+			Handler: previewCertHandler(serverCtx),
+		},
+		{
 			Method:  http.MethodGet,
 			Path:    "/api/cert/detail/:id",
 			Handler: getCertDetailHandler(serverCtx),
@@ -92,9 +118,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			Handler: downloadTemplateHandler(serverCtx),
 		},
 		{
+			Method:  http.MethodGet,
+			Path:    "/api/excel/template/download",
+			Handler: downloadTemplateFileHandler(serverCtx),
+		},
+		{
 			Method:  http.MethodPost,
 			Path:    "/api/export",
 			Handler: createExportTaskHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/api/watermark/preview",
+			Handler: watermarkPreviewHandler(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
@@ -108,6 +144,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 		{
 			Method:  http.MethodGet,
+			Path:    "/api/task/download/:id/file",
+			Handler: getTaskDownloadFileHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodGet,
 			Path:    "/api/task/list",
 			Handler: getTaskListHandler(serverCtx),
 		},
@@ -115,6 +156,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			Method:  http.MethodGet,
 			Path:    "/api/task/status/:id",
 			Handler: getTaskStatusHandler(serverCtx),
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/api/file/proxy",
+			Handler: fileProxyHandler(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
@@ -151,6 +197,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			Path:    "/api/user/update",
 			Handler: updateUserHandler(serverCtx),
 		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/api/operation-log/list",
+			Handler: getOperationLogListHandler(serverCtx),
+		},
 	}
-	server.AddRoutes(rest.WithMiddleware(jwt, protectedRoutes...))
+	server.AddRoutes(rest.WithMiddlewares([]rest.Middleware{jwt, opLog}, protectedRoutes...))
 }

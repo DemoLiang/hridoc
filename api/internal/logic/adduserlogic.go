@@ -39,7 +39,16 @@ func (l *AddUserLogic) AddUser(req *types.AddUserReq) (resp *types.BaseResp, err
 		return &types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"}, nil
 	}
 
-	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	password := req.Password
+	if password == "" {
+		if len(req.IdCard) >= 6 {
+			password = req.IdCard[len(req.IdCard)-6:]
+		} else {
+			password = req.IdCard
+		}
+	}
+
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		logx.Errorf("hash password failed: %v", err)
 		return &types.BaseResp{Code: errorx.ErrSystem, Message: "系统错误"}, nil

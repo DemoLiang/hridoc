@@ -79,17 +79,17 @@ func (l *GetCertListLogic) GetCertList(req *types.CertListReq) (resp *types.Cert
 		var rows []struct {
 			Id           int64          `db:"id"`
 			UserId       int64          `db:"user_id"`
-			UserName     string         `db:"user_name"`
+			UserName     sql.NullString `db:"user_name"`
 			CategoryId   int64          `db:"category_id"`
-			CategoryName string         `db:"category_name"`
+			CategoryName sql.NullString `db:"category_name"`
 			Name         string         `db:"name"`
 			CertNo       sql.NullString `db:"cert_no"`
 			Issuer       sql.NullString `db:"issuer"`
 			IssueDate    sql.NullTime   `db:"issue_date"`
 			ExpireDate   sql.NullTime   `db:"expire_date"`
 			Level        sql.NullString `db:"level"`
-			FileUrl      string         `db:"file_url"`
-			FileType     string         `db:"file_type"`
+			FileUrl      sql.NullString `db:"file_url"`
+			FileType     sql.NullString `db:"file_type"`
 			ThumbUrl     sql.NullString `db:"thumb_url"`
 			Status       int64          `db:"status"`
 		}
@@ -106,17 +106,17 @@ func (l *GetCertListLogic) GetCertList(req *types.CertListReq) (resp *types.Cert
 			list = append(list, types.CertificateInfo{
 				Id:           r.Id,
 				UserId:       r.UserId,
-				UserName:     r.UserName,
+				UserName:     nullString(r.UserName),
 				CategoryId:   r.CategoryId,
-				CategoryName: r.CategoryName,
+				CategoryName: nullString(r.CategoryName),
 				Name:         r.Name,
 				CertNo:       nullString(r.CertNo),
 				Issuer:       nullString(r.Issuer),
 				IssueDate:    formatDate(r.IssueDate),
 				ExpireDate:   formatDate(r.ExpireDate),
 				Level:        nullString(r.Level),
-				FileUrl:      r.FileUrl,
-				FileType:     r.FileType,
+				FileUrl:      nullString(r.FileUrl),
+				FileType:     nullString(r.FileType),
 				ThumbUrl:     nullString(r.ThumbUrl),
 				Status:       r.Status,
 			})

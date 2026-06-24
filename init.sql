@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `operation_log` (
 
 -- 初始化超级管理员（密码: admin123，bcrypt hash）
 INSERT INTO `user` (name, phone, id_card, role, status, password, created_at, updated_at)
-VALUES ('超级管理员', '13800000000', '000000000000000000', 1, 1, '$2a$10$X7oMyJxQ8ZlQkEYQKNr5U.Sl1fBxTjK.F8gN0hH3aTQmW8LgKJ6m', NOW(), NOW())
+VALUES ('admin', '13800000000', '000000000000000000', 1, 1, '$2a$10$UIsQxeYZewuasEs3SU99IeoU3nLcQlsZehrWbrg6siBzN/sfOKlSW', NOW(), NOW())
 ON DUPLICATE KEY UPDATE updated_at = NOW();
 
 -- 默认证件类型

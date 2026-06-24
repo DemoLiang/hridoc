@@ -84,6 +84,10 @@ func isAllowedType(fileType string, allowed []string) bool {
 		if strings.EqualFold(t, fileType) {
 			return true
 		}
+		// generic "image" matches any image/* in allowed list
+		if fileType == "image" && strings.HasPrefix(t, "image/") {
+			return true
+		}
 	}
 	return false
 }
@@ -175,11 +179,14 @@ func (l *UploadFileLogic) UploadFile(req *types.UploadReq) (resp *types.UploadRe
 		}, nil
 	}
 
+	var thumbUrl string
 	if fileType == "image" {
 		thumbData, err := generateThumbnail(req.File)
 		if err == nil && len(thumbData) > 0 {
 			thumbName := fmt.Sprintf("thumb/%s", objectName)
-			_ = l.svcCtx.MinIO.PutObject(l.ctx, thumbName, bytes.NewReader(thumbData), int64(len(thumbData)), "image/jpeg")
+			if err := l.svcCtx.MinIO.PutObject(l.ctx, thumbName, bytes.NewReader(thumbData), int64(len(thumbData)), "image/jpeg"); err == nil {
+				thumbUrl = l.svcCtx.MinIO.ObjectURL(thumbName)
+			}
 		}
 	}
 
@@ -188,6 +195,7 @@ func (l *UploadFileLogic) UploadFile(req *types.UploadReq) (resp *types.UploadRe
 		BaseResp: types.BaseResp{Code: 0, Message: "success"},
 		Data: types.UploadData{
 			Url:      url,
+			ThumbUrl: thumbUrl,
 			FileType: fileType,
 		},
 	}, nil

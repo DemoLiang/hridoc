@@ -30,7 +30,7 @@ func NewDownloadTemplateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *DownloadTemplateLogic) DownloadTemplate() (resp *types.TemplateResp, err error) {
+func (l *DownloadTemplateLogic) buildTemplateExcel() (*bytes.Buffer, error) {
 	f := excelize.NewFile()
 	sheet := "导入模板"
 	_ = f.SetSheetName("Sheet1", sheet)
@@ -53,7 +53,15 @@ func (l *DownloadTemplateLogic) DownloadTemplate() (resp *types.TemplateResp, er
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {
-		logx.Errorf("write excel template failed: %v", err)
+		return nil, err
+	}
+	return &buf, nil
+}
+
+func (l *DownloadTemplateLogic) DownloadTemplate() (resp *types.TemplateResp, err error) {
+	buf, err := l.buildTemplateExcel()
+	if err != nil {
+		logx.Errorf("build excel template failed: %v", err)
 		return &types.TemplateResp{
 			BaseResp: types.BaseResp{Code: errorx.ErrSystem, Message: "生成模板失败"},
 		}, nil
@@ -75,4 +83,13 @@ func (l *DownloadTemplateLogic) DownloadTemplate() (resp *types.TemplateResp, er
 		BaseResp: types.BaseResp{Code: 0, Message: "success"},
 		Data:     types.TemplateData{Url: url},
 	}, nil
+}
+
+func (l *DownloadTemplateLogic) DownloadTemplateFile() ([]byte, error) {
+	buf, err := l.buildTemplateExcel()
+	if err != nil {
+		logx.Errorf("build excel template failed: %v", err)
+		return nil, fmt.Errorf("生成模板失败: %w", err)
+	}
+	return buf.Bytes(), nil
 }

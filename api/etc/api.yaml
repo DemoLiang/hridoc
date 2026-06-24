@@ -1,23 +1,23 @@
 Name: hridoc-api
 Host: 0.0.0.0
-Port: 8888
+Port: 8889
 
 Mysql:
-  DataSource: root:root@tcp(localhost:3306)/hridoc?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  DataSource: root:123456@tcp(localhost:3306)/hridoc?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 
 CacheRedis:
-  - Host: localhost:6379
-    Pass: ""
-    Type: node
+  Host: localhost:6379
+  Pass: "123456"
+  Type: node
 
 JwtAuth:
   AccessSecret: hridoc-secret-key-change-in-production
   AccessExpire: 86400
 
 MinIO:
-  Endpoint: localhost:9000
-  AccessKey: minio
-  SecretKey: minio123
+  Endpoint: localhost:19000
+  AccessKey: minioadmin
+  SecretKey: minioadmin
   Bucket: hridoc-bucket
   UseSSL: false
   PresignedExpiry: 300

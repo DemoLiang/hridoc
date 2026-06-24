@@ -5,6 +5,7 @@ package logic
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/DemoLiang/hridoc/api/internal/svc"
@@ -52,16 +53,16 @@ func (l *GetTaskListLogic) GetTaskList(req *types.TaskListReq) (resp *types.Task
 
 	query := fmt.Sprintf("select id, task_name, user_count, cert_count, miss_count, status, fail_reason, file_url, created_at, completed_at from export_task order by id desc limit %d offset %d", pageSize, offset)
 	var rows []struct {
-		Id          int64  `db:"id"`
-		TaskName    string `db:"task_name"`
-		UserCount   int64  `db:"user_count"`
-		CertCount   int64  `db:"cert_count"`
-		MissCount   int64  `db:"miss_count"`
-		Status      int64  `db:"status"`
-		FailReason  string `db:"fail_reason"`
-		FileUrl     string `db:"file_url"`
-		CreatedAt   string `db:"created_at"`
-		CompletedAt string `db:"completed_at"`
+		Id          int64          `db:"id"`
+		TaskName    string         `db:"task_name"`
+		UserCount   int64          `db:"user_count"`
+		CertCount   int64          `db:"cert_count"`
+		MissCount   int64          `db:"miss_count"`
+		Status      int64          `db:"status"`
+		FailReason  sql.NullString `db:"fail_reason"`
+		FileUrl     sql.NullString `db:"file_url"`
+		CreatedAt   string         `db:"created_at"`
+		CompletedAt sql.NullString `db:"completed_at"`
 	}
 	if err = l.svcCtx.DB.QueryRowsPartialCtx(l.ctx, &rows, query); err != nil {
 		logx.Errorf("query export task list failed: %v", err)
@@ -79,10 +80,10 @@ func (l *GetTaskListLogic) GetTaskList(req *types.TaskListReq) (resp *types.Task
 			CertCount:   r.CertCount,
 			MissCount:   r.MissCount,
 			Status:      r.Status,
-			FailReason:  r.FailReason,
-			FileUrl:     r.FileUrl,
+			FailReason:  r.FailReason.String,
+			FileUrl:     r.FileUrl.String,
 			CreatedAt:   r.CreatedAt,
-			CompletedAt: r.CompletedAt,
+			CompletedAt: r.CompletedAt.String,
 		})
 	}
 

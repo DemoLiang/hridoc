@@ -4,7 +4,9 @@
 package handler
 
 import (
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/DemoLiang/hridoc/api/internal/logic"
 	"github.com/DemoLiang/hridoc/api/internal/svc"
@@ -14,14 +16,35 @@ import (
 
 func previewHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.PreviewReq
-		if err := httpx.Parse(r, &req); err != nil {
+		if err := r.ParseMultipartForm(32 << 20); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
+		file, _, err := r.FormFile("file")
+		if err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
+			return
+		}
+		defer file.Close()
+
+		excelBytes, err := io.ReadAll(file)
+		if err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
+			return
+		}
+
+		var categoryCodes []string
+		if codes := r.FormValue("categoryCodes"); codes != "" {
+			categoryCodes = strings.Split(codes, ",")
+		}
+
+		req := types.PreviewReq{
+			CategoryCodes: categoryCodes,
+		}
+
 		l := logic.NewPreviewLogic(r.Context(), svcCtx)
-		resp, err := l.Preview(&req)
+		resp, err := l.Preview(&req, excelBytes)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

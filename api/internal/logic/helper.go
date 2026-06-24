@@ -22,3 +22,17 @@ func formatDate(t sql.NullTime) string {
 	}
 	return ""
 }
+
+func nullString(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
+func formatDateTime(t sql.NullTime) string {
+	if t.Valid {
+		return t.Time.Format("2006-01-02 15:04:05")
+	}
+	return ""
+}

@@ -17,11 +17,15 @@ func JWTAuth(cfg config.Config) func(http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("Authorization")
 			if len(token) < 7 || token[:7] != "Bearer " {
-				httpx.WriteJson(w, http.StatusUnauthorized, map[string]any{
-					"code":    401,
-					"message": "missing or invalid authorization header",
-				})
-				return
+				if queryToken := r.URL.Query().Get("token"); queryToken != "" {
+					token = "Bearer " + queryToken
+				} else {
+					httpx.WriteJson(w, http.StatusUnauthorized, map[string]any{
+						"code":    401,
+						"message": "missing or invalid authorization header",
+					})
+					return
+				}
 			}
 
 			claims, err := jwtUtil.ParseToken(token[7:])

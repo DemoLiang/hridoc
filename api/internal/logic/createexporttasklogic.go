@@ -4,10 +4,14 @@
 package logic
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -15,6 +19,7 @@ import (
 	"github.com/DemoLiang/hridoc/api/internal/types"
 	"github.com/DemoLiang/hridoc/api/model"
 	"github.com/DemoLiang/hridoc/api/pkg/errorx"
+	"github.com/DemoLiang/hridoc/api/pkg/watermark"
 	"github.com/xuri/excelize/v2"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,16 +38,16 @@ func NewCreateExportTaskLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 	}
 }
 
-func (l *CreateExportTaskLogic) CreateExportTask(req *types.ExportTaskReq) (resp *types.ExportTaskResp, err error) {
-	if len(req.UserIds) == 0 || len(req.CategoryCodes) == 0 {
+func (l *CreateExportTaskLogic) CreateExportTask(req *types.ExportTaskReq, excelBytes []byte) (resp *types.ExportTaskResp, err error) {
+	if len(req.CategoryCodes) == 0 {
 		return &types.ExportTaskResp{
 			BaseResp: types.BaseResp{Code: errorx.ErrInvalidParam, Message: "参数错误"},
 		}, nil
 	}
 
 	task := &model.ExportTask{
-		TaskName: sql.NullString{String: fmt.Sprintf("导出任务_%s", time.Now().Format("20060102150405")), Valid: true},
-		Status:   1,
+		TaskName:  sql.NullString{String: fmt.Sprintf("导出任务_%s", time.Now().Format("20060102150405")), Valid: true},
+		Status:    1,
 		CreatedBy: 0,
 		CreatedAt: time.Now(),
 	}
@@ -57,7 +62,7 @@ func (l *CreateExportTaskLogic) CreateExportTask(req *types.ExportTaskReq) (resp
 
 	taskId, _ := result.LastInsertId()
 
-	go l.processExport(taskId, req)
+	go l.processExport(taskId, excelBytes, req.UserIds, req)
 
 	return &types.ExportTaskResp{
 		BaseResp: types.BaseResp{Code: 0, Message: "success"},
@@ -65,71 +70,174 @@ func (l *CreateExportTaskLogic) CreateExportTask(req *types.ExportTaskReq) (resp
 	}, nil
 }
 
-func (l *CreateExportTaskLogic) processExport(taskId int64, req *types.ExportTaskReq) {
+func (l *CreateExportTaskLogic) processExport(taskId int64, excelBytes []byte, userIds []int64, req *types.ExportTaskReq) {
 	ctx := context.Background()
 
-	users, certCount, missCount, err := l.buildPreviewData(ctx, req)
-	if err != nil {
-		l.updateTaskFailed(ctx, taskId, err.Error())
+	var matchedUsers []types.ExcelPreviewUser
+	var certInfos map[int64][]certInfo
+	var missCount int
+	var parseErr error
+
+	if len(excelBytes) > 0 {
+		matchedUsers, certInfos, missCount, parseErr = l.parseExcelAndMatchUsers(ctx, excelBytes, req.CategoryCodes)
+	} else if len(userIds) > 0 {
+		matchedUsers, certInfos, missCount, parseErr = l.buildUsersFromIds(ctx, userIds, req.CategoryCodes)
+	} else {
+		parseErr = fmt.Errorf("缺少名单数据")
+	}
+
+	if parseErr != nil {
+		l.updateTaskFailed(ctx, taskId, parseErr.Error())
 		return
 	}
 
-	f := excelize.NewFile()
-	sheet := "导出结果"
-	_ = f.SetSheetName("Sheet1", sheet)
-
-	headers := []string{"姓名", "身份证号"}
-	for _, code := range req.CategoryCodes {
-		name := l.getCategoryName(ctx, code)
-		headers = append(headers, name)
+	if len(matchedUsers) == 0 {
+		l.updateTaskFailed(ctx, taskId, "未找到可导出的证件文件")
+		return
 	}
 
-	for i, h := range headers {
-		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
-		_ = f.SetCellValue(sheet, cell, h)
+	// 2. 创建临时目录
+	tempDir := fmt.Sprintf("./tmp/exports/task_%d", taskId)
+	if err := os.MkdirAll(tempDir, 0755); err != nil {
+		logx.Errorf("create temp dir failed: %v", err)
+		l.updateTaskFailed(ctx, taskId, "创建临时目录失败")
+		return
 	}
+	defer func() {
+		_ = os.RemoveAll(tempDir)
+	}()
 
-	for rIdx, u := range users {
-		rowNum := rIdx + 2
-		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", rowNum), u.UserName)
-		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", rowNum), l.getUserIdCard(ctx, u.UserId))
+	// 3. 下载证件文件、打水印、保存到临时目录
+	var totalCertCount int
+	for _, user := range matchedUsers {
+		userCerts := certInfos[user.UserId]
+		if len(userCerts) == 0 {
+			continue
+		}
 
-		for cIdx, pc := range u.Categories {
-			col := string(rune('C' + cIdx))
-			if pc.HasCert {
-				_ = f.SetCellValue(sheet, fmt.Sprintf("%s%d", col, rowNum), pc.CertName)
-			} else {
-				_ = f.SetCellValue(sheet, fmt.Sprintf("%s%d", col, rowNum), "缺证")
+		userDir := filepath.Join(tempDir, sanitizeFileName(user.UserName))
+		if err := os.MkdirAll(userDir, 0755); err != nil {
+			logx.Errorf("create user dir failed: %v", err)
+			continue
+		}
+
+		for _, cert := range userCerts {
+			if cert.FileUrl == "" {
+				continue
 			}
+
+			// 从 MinIO 下载文件
+			objectName := extractMinioObjectName(cert.FileUrl, l.svcCtx.Config.MinIO.Bucket)
+				if objectName == "" {
+					logx.Errorf("cannot extract object name from fileUrl=%s", cert.FileUrl)
+					continue
+				}
+				obj, err := l.svcCtx.MinIO.GetObject(ctx, objectName)
+			if err != nil {
+				logx.Errorf("get object from minio failed, fileUrl=%s: %v", cert.FileUrl, err)
+				continue
+			}
+
+			data, err := io.ReadAll(obj)
+			obj.Close()
+			if err != nil {
+				logx.Errorf("read object data failed, fileUrl=%s: %v", cert.FileUrl, err)
+				continue
+			}
+
+			// 打水印
+			opts := &watermark.Options{
+				Text:     req.WatermarkText,
+				Mode:     req.WatermarkMode,
+				Color:    req.WatermarkColor,
+				Opacity:  req.WatermarkOpacity,
+				FontSize: req.WatermarkFontSize,
+			}
+			processedData, fileType, err := watermark.ApplyIfNeeded(data, cert.FileType, opts)
+			if err != nil {
+				logx.Errorf("apply watermark failed, certId=%d: %v", cert.CertId, err)
+				processedData = data
+				fileType = cert.FileType
+			}
+
+			// 确定文件扩展名
+			ext := getFileExt(fileType)
+			fileName := fmt.Sprintf("%s-%s%s", sanitizeFileName(cert.CatName), sanitizeFileName(cert.CertName), ext)
+			filePath := filepath.Join(userDir, fileName)
+
+			if err := os.WriteFile(filePath, processedData, 0644); err != nil {
+				logx.Errorf("write file failed: %v", err)
+				continue
+			}
+
+			totalCertCount++
 		}
 	}
 
-	for i := range headers {
-		col := string(rune('A' + i))
-		_ = f.SetColWidth(sheet, col, col, 18)
-	}
-
-	var buf bytes.Buffer
-	if err := f.Write(&buf); err != nil {
-		l.updateTaskFailed(ctx, taskId, "生成Excel失败")
+	if totalCertCount == 0 {
+		l.updateTaskFailed(ctx, taskId, "未找到可导出的证件文件")
 		return
 	}
 
-	objectName := fmt.Sprintf("exports/task_%d_%s.xlsx", taskId, time.Now().Format("20060102150405"))
-	err = l.svcCtx.MinIO.PutObject(ctx, objectName, bytes.NewReader(buf.Bytes()), int64(buf.Len()),
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	// 4. 打包 ZIP
+	zipBuf := &bytes.Buffer{}
+	zipWriter := zip.NewWriter(zipBuf)
+
+	err := filepath.Walk(tempDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		relPath, err := filepath.Rel(tempDir, path)
+		if err != nil {
+			return err
+		}
+		relPath = filepath.ToSlash(relPath)
+
+		fileWriter, err := zipWriter.Create(relPath)
+		if err != nil {
+			return err
+		}
+
+		fileData, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		_, err = fileWriter.Write(fileData)
+		return err
+	})
 	if err != nil {
-		logx.Errorf("upload export file failed: %v", err)
+		logx.Errorf("walk temp dir failed: %v", err)
+		l.updateTaskFailed(ctx, taskId, "打包 ZIP 失败")
+		return
+	}
+
+	if err := zipWriter.Close(); err != nil {
+		logx.Errorf("close zip writer failed: %v", err)
+		l.updateTaskFailed(ctx, taskId, "打包 ZIP 失败")
+		return
+	}
+
+	// 5. 上传 ZIP 到 MinIO
+	objectName := fmt.Sprintf("exports/task_%d_%s.zip", taskId, time.Now().Format("20060102150405"))
+	err = l.svcCtx.MinIO.PutObject(ctx, objectName, bytes.NewReader(zipBuf.Bytes()), int64(zipBuf.Len()), "application/zip")
+	if err != nil {
+		logx.Errorf("upload zip to minio failed: %v", err)
 		l.updateTaskFailed(ctx, taskId, "上传导出文件失败")
 		return
 	}
 
+	// 6. 更新任务状态为完成
 	url := l.svcCtx.MinIO.ObjectURL(objectName)
 	now := time.Now()
 	_, err = l.svcCtx.DB.ExecCtx(ctx,
 		`update export_task set task_name=?, user_count=?, cert_count=?, miss_count=?, file_url=?, status=?, completed_at=? where id=?`,
 		fmt.Sprintf("导出任务_%s", time.Now().Format("20060102150405")),
-		int64(len(users)), certCount, missCount, url, 2, now, taskId,
+		int64(len(matchedUsers)), int64(totalCertCount), int64(missCount), url, 2, now, taskId,
 	)
 	if err != nil {
 		logx.Errorf("update export task success status failed: %v", err)
@@ -146,33 +254,34 @@ func (l *CreateExportTaskLogic) updateTaskFailed(ctx context.Context, taskId int
 	}
 }
 
-func (l *CreateExportTaskLogic) buildPreviewData(ctx context.Context, req *types.ExportTaskReq) ([]types.PreviewUser, int64, int64, error) {
-	userPlaceholders := make([]string, len(req.UserIds))
-	userArgs := make([]any, len(req.UserIds))
-	for i, id := range req.UserIds {
-		userPlaceholders[i] = "?"
-		userArgs[i] = id
+// parseExcelAndMatchUsers 解析 Excel 并匹配用户，返回匹配到的用户列表、证件信息、missCount
+func (l *CreateExportTaskLogic) parseExcelAndMatchUsers(ctx context.Context, excelBytes []byte, categoryCodes []string) ([]types.ExcelPreviewUser, map[int64][]certInfo, int, error) {
+	f, err := excelize.OpenReader(strings.NewReader(string(excelBytes)))
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("Excel 文件格式错误")
+	}
+	defer f.Close()
+
+	sheetName := f.GetSheetName(0)
+	if sheetName == "" {
+		sheetName = "Sheet1"
 	}
 
-	catPlaceholders := make([]string, len(req.CategoryCodes))
-	catArgs := make([]any, len(req.CategoryCodes))
-	for i, code := range req.CategoryCodes {
+	rows, err := f.GetRows(sheetName)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("Excel 文件读取失败")
+	}
+
+	if len(rows) < 2 {
+		return nil, nil, 0, fmt.Errorf("Excel 数据为空")
+	}
+
+	// 查询证件类型信息
+	catPlaceholders := make([]string, len(categoryCodes))
+	catArgs := make([]any, len(categoryCodes))
+	for i, code := range categoryCodes {
 		catPlaceholders[i] = "?"
 		catArgs[i] = code
-	}
-
-	userQuery := fmt.Sprintf("select id, name from user where id in (%s) and status = 1", strings.Join(userPlaceholders, ","))
-	var userRows []struct {
-		Id   int64  `db:"id"`
-		Name string `db:"name"`
-	}
-	if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &userRows, userQuery, userArgs...); err != nil {
-		return nil, 0, 0, err
-	}
-
-	userMap := make(map[int64]string, len(userRows))
-	for _, u := range userRows {
-		userMap[u.Id] = u.Name
 	}
 
 	catQuery := fmt.Sprintf("select id, code, name from cert_category where code in (%s) and status = 1", strings.Join(catPlaceholders, ","))
@@ -182,106 +291,279 @@ func (l *CreateExportTaskLogic) buildPreviewData(ctx context.Context, req *types
 		Name string `db:"name"`
 	}
 	if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &catRows, catQuery, catArgs...); err != nil {
-		return nil, 0, 0, err
+		return nil, nil, 0, fmt.Errorf("查询证件类型失败")
 	}
 
-	catIdMap := make(map[int64]struct{ Code, Name string }, len(catRows))
 	catCodeMap := make(map[string]struct{ Id int64; Name string }, len(catRows))
 	for _, c := range catRows {
-		catIdMap[c.Id] = struct{ Code, Name string }{Code: c.Code, Name: c.Name}
 		catCodeMap[c.Code] = struct{ Id int64; Name string }{Id: c.Id, Name: c.Name}
 	}
 
-	certPlaceholders := make([]string, len(req.UserIds))
-	certArgs := make([]any, len(req.UserIds))
-	for i, id := range req.UserIds {
-		certPlaceholders[i] = "?"
-		certArgs[i] = id
-	}
-	certQuery := fmt.Sprintf(`select c.id, c.user_id, c.category_id, c.name as cert_name
-		from certificate c
-		where c.user_id in (%s) and c.status = 1
-		order by c.user_id, c.category_id, c.id desc`, strings.Join(certPlaceholders, ","))
-	var certRows []struct {
-		Id         int64  `db:"id"`
-		UserId     int64  `db:"user_id"`
-		CategoryId int64  `db:"category_id"`
-		CertName   string `db:"cert_name"`
-	}
-	if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &certRows, certQuery, certArgs...); err != nil {
-		return nil, 0, 0, err
-	}
+	var matchedUsers []types.ExcelPreviewUser
+	certInfos := make(map[int64][]certInfo)
+	var missCount int
 
-	certMap := make(map[int64]map[string]struct {
-		CertId   int64
-		CertName string
-	})
-	for _, r := range certRows {
-		if _, ok := certMap[r.UserId]; !ok {
-			certMap[r.UserId] = make(map[string]struct{ CertId int64; CertName string })
-		}
-		if catInfo, ok := catIdMap[r.CategoryId]; ok {
-			if _, exists := certMap[r.UserId][catInfo.Code]; !exists {
-				certMap[r.UserId][catInfo.Code] = struct {
-					CertId   int64
-					CertName string
-				}{CertId: r.Id, CertName: r.CertName}
-			}
-		}
-	}
-
-	var users []types.PreviewUser
-	var certCount, missCount int64
-	for _, uid := range req.UserIds {
-		name, ok := userMap[uid]
-		if !ok {
+	for rowIdx := 1; rowIdx < len(rows); rowIdx++ {
+		row := rows[rowIdx]
+		if len(row) < 2 {
 			continue
 		}
-		pu := types.PreviewUser{
-			UserId:   uid,
-			UserName: name,
+
+		name := strings.TrimSpace(row[0])
+		idCard := strings.TrimSpace(row[1])
+
+		if name == "" && idCard == "" {
+			continue
 		}
-		for _, code := range req.CategoryCodes {
-			catInfo, ok := catCodeMap[code]
-			if !ok {
+
+		// 步骤 1: 尝试身份证号精确匹配
+		var matchedUser *model.User
+		if idCard != "" {
+			user, err := l.svcCtx.UserModel.FindOneByIdCard(ctx, idCard)
+			if err == nil && user != nil && user.Status == 1 {
+				matchedUser = user
+			}
+		}
+
+		// 步骤 2: 身份证号未匹配，尝试姓名匹配
+		if matchedUser == nil && name != "" {
+			var nameUsers []struct {
+				Id   int64  `db:"id"`
+				Name string `db:"name"`
+			}
+			queryErr := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &nameUsers,
+				"select id, name from user where name = ? and status = 1", name)
+			if queryErr == nil && len(nameUsers) == 1 {
+				matchedUser = &model.User{
+					Id:   nameUsers[0].Id,
+					Name: nameUsers[0].Name,
+				}
+			}
+		}
+
+		if matchedUser == nil {
+			continue
+		}
+
+		// 步骤 3: 查询该用户的证件（需要 file_url 和 file_type）
+		certCatPlaceholders := make([]string, len(categoryCodes))
+		certCatArgs := make([]any, len(categoryCodes))
+		for i, code := range categoryCodes {
+			certCatPlaceholders[i] = "?"
+			certCatArgs[i] = code
+		}
+		certCatArgs = append(certCatArgs, matchedUser.Id)
+
+		certQuery := fmt.Sprintf(`select c.id, c.user_id, c.name as cert_name, c.file_url, c.file_type, cc.code, cc.name as cat_name
+			from certificate c join cert_category cc ON c.category_id = cc.id
+			where cc.code in (%s) and c.user_id = ? and c.status = 1
+			order by c.user_id, cc.code, c.id desc`, strings.Join(certCatPlaceholders, ","))
+
+		var certRows []struct {
+			Id       int64  `db:"id"`
+			UserId   int64  `db:"user_id"`
+			CertName string `db:"cert_name"`
+			FileUrl  string `db:"file_url"`
+			FileType string `db:"file_type"`
+			Code     string `db:"code"`
+			CatName  string `db:"cat_name"`
+		}
+		if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &certRows, certQuery, certCatArgs...); err != nil {
+			logx.Errorf("query certs failed: %v", err)
+		}
+
+		// 去重：每个 categoryCode 只取第一个
+		seenCodes := make(map[string]bool)
+		var userCerts []certInfo
+		for _, r := range certRows {
+			if seenCodes[r.Code] {
 				continue
 			}
-			pc := types.PreviewCategory{
-				CategoryCode: code,
-				CategoryName: catInfo.Name,
-			}
-			if certs, ok := certMap[uid]; ok {
-				if c, ok := certs[code]; ok {
-					pc.HasCert = true
-					pc.CertId = c.CertId
-					pc.CertName = c.CertName
-					certCount++
-				} else {
-					missCount++
-				}
-			} else {
-				missCount++
-			}
-			pu.Categories = append(pu.Categories, pc)
+			seenCodes[r.Code] = true
+			userCerts = append(userCerts, certInfo{
+				CertId:   r.Id,
+				CertName: r.CertName,
+				FileUrl:  r.FileUrl,
+				FileType: r.FileType,
+				CatName:  r.CatName,
+			})
 		}
-		users = append(users, pu)
+
+		if len(userCerts) == 0 {
+			missCount++
+			continue
+		}
+
+		matchedUsers = append(matchedUsers, types.ExcelPreviewUser{
+			UserId:   matchedUser.Id,
+			UserName: matchedUser.Name,
+		})
+		certInfos[matchedUser.Id] = userCerts
 	}
 
-	return users, certCount, missCount, nil
+	return matchedUsers, certInfos, missCount, nil
 }
 
-func (l *CreateExportTaskLogic) getCategoryName(ctx context.Context, code string) string {
-	var row struct {
+// buildUsersFromIds 根据用户ID直接查询用户和证件信息
+func (l *CreateExportTaskLogic) buildUsersFromIds(ctx context.Context, userIds []int64, categoryCodes []string) ([]types.ExcelPreviewUser, map[int64][]certInfo, int, error) {
+	if len(categoryCodes) == 0 {
+		return nil, nil, 0, fmt.Errorf("请选择证件类型")
+	}
+
+	placeholders := make([]string, len(userIds))
+	args := make([]any, len(userIds))
+	for i, id := range userIds {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
+	var users []struct {
+		Id   int64  `db:"id"`
 		Name string `db:"name"`
 	}
-	_ = l.svcCtx.DB.QueryRowCtx(ctx, &row, "select name from cert_category where code = ? limit 1", code)
-	return row.Name
+	query := fmt.Sprintf("select id, name from user where id in (%s) and status = 1", strings.Join(placeholders, ","))
+	if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &users, query, args...); err != nil {
+		return nil, nil, 0, fmt.Errorf("查询用户失败")
+	}
+
+	catPlaceholders := make([]string, len(categoryCodes))
+	catArgs := make([]any, len(categoryCodes))
+	for i, code := range categoryCodes {
+		catPlaceholders[i] = "?"
+		catArgs[i] = code
+	}
+	var catRows []struct {
+		Id   int64  `db:"id"`
+		Code string `db:"code"`
+		Name string `db:"name"`
+	}
+	catQuery := fmt.Sprintf("select id, code, name from cert_category where code in (%s) and status = 1", strings.Join(catPlaceholders, ","))
+	if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &catRows, catQuery, catArgs...); err != nil {
+		return nil, nil, 0, fmt.Errorf("查询证件类型失败")
+	}
+	catCodeMap := make(map[string]struct{ Id int64; Name string }, len(catRows))
+	for _, c := range catRows {
+		catCodeMap[c.Code] = struct{ Id int64; Name string }{Id: c.Id, Name: c.Name}
+	}
+
+	var matchedUsers []types.ExcelPreviewUser
+	certInfos := make(map[int64][]certInfo)
+	var missCount int
+
+	for _, u := range users {
+		certCatPlaceholders := make([]string, len(categoryCodes))
+		certCatArgs := make([]any, len(categoryCodes))
+		for i, code := range categoryCodes {
+			certCatPlaceholders[i] = "?"
+			certCatArgs[i] = code
+		}
+		certCatArgs = append(certCatArgs, u.Id)
+
+		certQuery := fmt.Sprintf(`select c.id, c.user_id, c.name as cert_name, c.file_url, c.file_type, cc.code, cc.name as cat_name
+			from certificate c join cert_category cc ON c.category_id = cc.id
+			where cc.code in (%s) and c.user_id = ? and c.status = 1
+			order by c.user_id, cc.code, c.id desc`, strings.Join(certCatPlaceholders, ","))
+
+		var certRows []struct {
+			Id       int64  `db:"id"`
+			UserId   int64  `db:"user_id"`
+			CertName string `db:"cert_name"`
+			FileUrl  string `db:"file_url"`
+			FileType string `db:"file_type"`
+			Code     string `db:"code"`
+			CatName  string `db:"cat_name"`
+		}
+		if err := l.svcCtx.DB.QueryRowsPartialCtx(ctx, &certRows, certQuery, certCatArgs...); err != nil {
+			logx.Errorf("query certs failed: %v", err)
+		}
+
+		seenCodes := make(map[string]bool)
+		var userCerts []certInfo
+		for _, cr := range certRows {
+			if seenCodes[cr.Code] {
+				continue
+			}
+			seenCodes[cr.Code] = true
+			userCerts = append(userCerts, certInfo{
+				CertId:   cr.Id,
+				CertName: cr.CertName,
+				FileUrl:  cr.FileUrl,
+				FileType: cr.FileType,
+				CatName:  cr.CatName,
+			})
+		}
+
+		if len(userCerts) == 0 {
+			missCount++
+			continue
+		}
+
+		matchedUsers = append(matchedUsers, types.ExcelPreviewUser{
+			UserId:   u.Id,
+			UserName: u.Name,
+		})
+		certInfos[u.Id] = userCerts
+	}
+
+	return matchedUsers, certInfos, missCount, nil
 }
 
-func (l *CreateExportTaskLogic) getUserIdCard(ctx context.Context, userId int64) string {
-	var row struct {
-		IdCard string `db:"id_card"`
+type certInfo struct {
+	CertId   int64
+	CertName string
+	FileUrl  string
+	FileType string
+	CatName  string
+}
+
+func extractMinioObjectName(fileUrl, bucket string) string {
+	parsed := strings.Split(fileUrl, "?")[0]
+	parts := strings.Split(parsed, "/")
+	if len(parts) < 2 {
+		return ""
 	}
-	_ = l.svcCtx.DB.QueryRowCtx(ctx, &row, "select id_card from user where id = ? limit 1", userId)
-	return row.IdCard
+	// Try exact bucket match
+	bucketIndex := -1
+	for i := 0; i < len(parts); i++ {
+		if parts[i] == bucket {
+			bucketIndex = i
+			break
+		}
+	}
+	if bucketIndex != -1 && bucketIndex+1 < len(parts) {
+		return strings.Join(parts[bucketIndex+1:], "/")
+	}
+	// Fallback: last two path segments
+	return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+}
+
+func sanitizeFileName(name string) string {
+	// 移除文件名中的非法字符
+	replacer := strings.NewReplacer(
+		"/", "_",
+		"\\", "_",
+		":", "_",
+		"*", "_",
+		"?", "_",
+		"\"", "_",
+		"<", "_",
+		">", "_",
+		"|", "_",
+	)
+	return replacer.Replace(name)
+}
+
+func getFileExt(fileType string) string {
+	switch fileType {
+	case "jpeg", "jpg":
+		return ".jpg"
+	case "png":
+		return ".png"
+	case "pdf":
+		return ".pdf"
+	case "image":
+		return ".png"
+	default:
+		return ""
+	}
 }
